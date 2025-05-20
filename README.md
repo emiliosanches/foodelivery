@@ -1,4 +1,4 @@
-# Mini-iFood: Sistema de Pedidos e Entregas
+# Mini-food: Sistema de Pedidos e Entregas
 
 Um sistema completo de delivery de comida inspirado no iFood, desenvolvido com NestJS e Next.js.
 
