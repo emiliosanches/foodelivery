@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
 import { logout as logoutAction } from "@/app/actions/auth";
@@ -40,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-  const loadUserFromCookie = () => {
+  const loadUserFromCookie = useCallback(() => {
     try {
       const userCookie = document.cookie
         .split("; ")
@@ -54,11 +55,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to load user from cookie:", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadUserFromCookie();
-  }, []);
+  }, [loadUserFromCookie]);
 
   const logout = async () => {
     try {

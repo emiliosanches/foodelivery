@@ -1,8 +1,8 @@
-import { requireAuth } from "@/lib/auth-utils";
+import { getUserServerSide } from "@/lib/auth-utils";
 import ProfileForm from "./profile-form";
 
 export default async function ProfilePage() {
-  const user = await requireAuth();
+  const user = await getUserServerSide();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -10,7 +10,7 @@ export default async function ProfilePage() {
         <h1 className="text-2xl font-bold mb-6">My Profile</h1>
 
         <div className="bg-white rounded-lg shadow p-6">
-          <ProfileForm initialData={user} />
+          <ProfileForm initialData={user!} />
         </div>
       </div>
     </div>

@@ -1,8 +1,9 @@
 "use server";
 
-import { cookies as getCookies } from "next/headers";
-import { getServerUser } from "@/lib/auth-utils";
+import { cookies } from "next/headers";
 import z from "zod";
+import { api } from "@/lib/service/api";
+import { ApiError } from "@/lib/service/api-error";
 
 export type ProfileData = {
   name: string;
@@ -19,10 +20,7 @@ const updateProfileSchema = z.object({
     .email("Email is not a valid email address"),
   phone: z
     .string()
-    .regex(
-      /^\d{9,}$/,
-      "Phone must be a phone starting with DDI (ex: +12321232123)"
-    )
+    .regex(/^\+?\d{9,}$/, "Phone must be a phone with at least 9 digits (ex: +123499999)")
     .optional(),
 });
 
@@ -52,20 +50,10 @@ export async function updateProfile(
   };
 
   try {
-    const currentUser = await getServerUser();
+    const validation = updateProfileSchema.safeParse(formValues);
 
-    if (!currentUser) {
-      return {
-        success: false,
-        error: { general: "You must be authenticated to update your profile" },
-        values: formValues,
-      };
-    }
-
-    const { success, error, data } = updateProfileSchema.safeParse(formValues);
-
-    if (!success) {
-      const errors = error.flatten().fieldErrors;
+    if (!validation.success) {
+      const errors = validation.error.flatten().fieldErrors;
 
       return {
         success: false,
@@ -78,27 +66,74 @@ export async function updateProfile(
       };
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth-token")?.value;
 
-    const updatedUser = {
-      ...currentUser,
-      name: data.name,
-      email: data.email,
-    };
+    if (!token) {
+      return {
+        success: false,
+        error: { general: "Authentication token not found" },
+        values: formValues,
+      };
+    }
 
-    const cookies = await getCookies();
+    try {
+      const updatedUserData = await api<{
+        name: string;
+        email: string;
+        phone?: string;
+      }>("/users/me", {
+        method: "PATCH",
+        body: validation.data,
+        cache: "no-store",
+      });
 
-    cookies.set({
-      name: "user-info",
-      value: JSON.stringify(updatedUser),
-      httpOnly: false,
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 dias
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
+      const updatedUser = {
+        name: updatedUserData.name || validation.data.name,
+        email: updatedUserData.email || validation.data.email,
+        phone: updatedUserData.phone || validation.data.phone,
+      };
 
-    return { success: true, values: formValues };
+      cookieStore.set({
+        name: "user-info",
+        value: JSON.stringify(updatedUser),
+        httpOnly: false,
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      return {
+        success: true,
+        values: {
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+        },
+      };
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+
+      if (error instanceof ApiError && error.statusCode === 409) {
+        return {
+          success: false,
+          error: { email: "This email is already in use by another account" },
+          values: formValues,
+        };
+      }
+
+      return {
+        success: false,
+        error: {
+          general:
+            error instanceof Error
+              ? error.message
+              : "Failed to update profile. Try again.",
+        },
+        values: formValues,
+      };
+    }
   } catch (error) {
     console.error("Failed to update profile:", error);
     return {

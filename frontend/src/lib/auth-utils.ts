@@ -1,3 +1,5 @@
+'use server'
+
 import { cookies as getCookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -8,7 +10,7 @@ type User = {
   role: string;
 };
 
-export async function getServerUser(): Promise<User | null> {
+export async function getUserServerSide(): Promise<User | null> {
   const cookies = await getCookies();
   const userCookie = cookies.get("user-info");
   const tokenCookie = cookies.get("auth-token");
@@ -25,7 +27,7 @@ export async function getServerUser(): Promise<User | null> {
 }
 
 export async function requireAuth(redirectUrl = "/auth/login"): Promise<User> {
-  const user = await getServerUser();
+  const user = await getUserServerSide();
 
   if (!user) {
     redirect(redirectUrl);

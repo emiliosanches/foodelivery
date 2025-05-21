@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { ApiError } from "./api-error";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -55,8 +56,10 @@ export async function api<ResponseType = unknown>(
       errorData = { message: errorText };
     }
 
-    throw new Error(
-      errorData.message || `API request failed with status ${response.status}`
+    throw new ApiError(
+      response.status,
+      errorData.message || `API request failed with status ${response.status}`,
+      errorData,
     );
   }
 
