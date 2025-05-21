@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { v7 as uuidv7 } from 'uuid';
@@ -18,7 +18,7 @@ export class AuthService implements AuthServicePort {
   async register(userData: RegisterUserDto): Promise<User> {
     const existingUser = await this.userRepository.findByEmail(userData.email);
     if (existingUser) {
-      throw new Error('Email already in use');
+      throw new ConflictException('Email already in use');
     }
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);

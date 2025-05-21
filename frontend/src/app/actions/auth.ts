@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { User } from "@/contexts/auth-context";
 
-const TOKEN_MAX_AGE = 60 * 60 * 24 * 7;
+const TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7 dias
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 const loginSchema = z.object({
   email: z.string().email("Email is not valid"),
@@ -51,25 +52,35 @@ export async function login(
   try {
     const { email, password } = validation.data;
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+      cache: "no-store",
+    });
 
-    if (email !== "test@example.com" || password !== "password123") {
+    if (!response.ok) {
+      if (response.status === 401) {
+        return {
+          success: false,
+          error: { general: "Invalid credentials. Please try again." },
+          values: { email, password: "" },
+        };
+      }
+
+      const errorData = await response.json().catch(() => ({}));
       return {
         success: false,
-        error: { general: "Invalid credentials. Please try again." },
+        error: {
+          general: errorData.message || "Failed to login. Please try again.",
+        },
         values: { email, password: "" },
       };
     }
 
-    const authResponse = {
-      token: "jwt-token-simulated",
-      user: {
-        id: "user-123",
-        name: "Test User",
-        email,
-        role: "CUSTOMER",
-      },
-    };
+    const authResponse = await response.json();
 
     const cookiesStore = await cookies();
     cookiesStore.set({
@@ -89,6 +100,7 @@ export async function login(
         name: authResponse.user.name,
         email: authResponse.user.email,
         role: authResponse.user.role,
+        phone: authResponse.user.phone, // Incluindo o telefone que estava no seu AuthContext
       }),
       httpOnly: false,
       path: "/",
@@ -99,7 +111,7 @@ export async function login(
 
     return {
       success: true,
-    }
+    };
   } catch (error) {
     console.error("Login error:", error);
     return {
@@ -172,12 +184,32 @@ export async function register(
   try {
     const data = validation.data;
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
 
-    if (data.email === "test@example.com") {
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+
+      if (response.status === 409) {
+        return {
+          success: false,
+          error: { email: "This email is already in use" },
+          values: { ...data, password: "" },
+        };
+      }
+
       return {
         success: false,
-        error: { email: "This email is already in use" },
+        error: {
+          general:
+            errorData.message || "Failed to create account. Please try again.",
+        },
         values: { ...data, password: "" },
       };
     }
