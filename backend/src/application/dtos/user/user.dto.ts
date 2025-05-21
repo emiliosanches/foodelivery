@@ -1,4 +1,5 @@
 import { UserRole } from '@/domain/entities/user.entity';
+import { IsOptional, IsString, ValidateIf } from 'class-validator';
 
 export class CreateUserDto {
   email: string;
@@ -9,10 +10,20 @@ export class CreateUserDto {
 }
 
 export class UpdateUserDto {
+  @IsString()
+  @IsOptional()
   name?: string;
+
+  @IsString()
+  @IsOptional()
   email?: string;
-  phone?: string;
+
+  @IsString()
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  phone?: string | null;
+
+  @IsString()
+  @IsOptional()
   password?: string;
 }
-
-export class RegisterUserDto extends CreateUserDto {}
