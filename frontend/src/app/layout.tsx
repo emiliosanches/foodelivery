@@ -1,9 +1,9 @@
-// src/app/layout.tsx (substituindo o existente)
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import { AuthProvider } from "@/contexts/auth-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,10 +19,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${inter.className} min-h-screen flex flex-col font-inter`}>
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+      <body
+        className={`${inter.className} min-h-screen flex flex-col font-inter`}
+      >
+        <AuthProvider>
+          <Header />
+          <main className="flex-grow flex flex-col">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

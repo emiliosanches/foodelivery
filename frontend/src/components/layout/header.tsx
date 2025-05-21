@@ -1,16 +1,20 @@
-// src/components/layout/header.tsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, User, ShoppingBag, LogOut } from "lucide-react";
 import Button from "../ui/button";
+import { useAuth } from "@/contexts/auth-context";
 import Logo from "../ui/logo";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
-  const user = null;
+  const handleLogout = async () => {
+    await logout();
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="bg-white shadow">
@@ -39,7 +43,7 @@ export default function Header() {
                 <div className="relative">
                   <button className="flex items-center text-gray-600 hover:text-primary-600">
                     <User className="w-5 h-5 mr-1" />
-                    <span>Minha Conta</span>
+                    <span>{user.name.split(" ")[0]}</span>
                   </button>
                 </div>
                 <Link href="/cart">
@@ -48,6 +52,13 @@ export default function Header() {
                     Carrinho
                   </Button>
                 </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center text-red-600 hover:text-red-700"
+                >
+                  <LogOut className="w-4 h-4 mr-1" />
+                  Sair
+                </button>
               </>
             ) : (
               <>
@@ -108,7 +119,10 @@ export default function Header() {
                 >
                   Carrinho
                 </Link>
-                <button className="flex items-center py-2 text-red-600 hover:text-red-800">
+                <button
+                  className="flex items-center py-2 text-red-600 hover:text-red-800"
+                  onClick={handleLogout}
+                >
                   <LogOut className="w-4 h-4 mr-1" />
                   Sair
                 </button>

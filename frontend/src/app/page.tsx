@@ -1,4 +1,3 @@
-// src/app/page.tsx (substituindo o existente)
 import Link from "next/link";
 import Button from "@/components/ui/button";
 import Image from "next/image";
@@ -31,11 +30,10 @@ export default function Home() {
             </div>
             <div className="w-full md:w-1/2 pl-20">
               <div className="bg-gray-200 rounded-lg h-80 flex items-center justify-center relative">
-                {/* Placeholder para uma imagem/ilustração */}
                 <Image
                   fill
-                  src="/images/hero-2.png"
-                  alt=""
+                  src="/images/hero.png"
+                  alt="Imagem mostrando a entrega de um pacote de delivery por aplicativo"
                   className="absolute object-cover"
                 />
               </div>
