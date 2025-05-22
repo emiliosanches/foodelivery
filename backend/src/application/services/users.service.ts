@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { User } from '@/domain/entities/user.entity';
-import { CreateUserDto, UpdateUserDto } from '@/application/dtos/user/user.dto';
+import { UpdateUserDto } from '@/application/dtos/user/update-user.dto';
 import { UserRepositoryPort } from '../ports/out/repositories/user.repository.port';
 import { UserServicePort } from '../ports/in/services/user.service.port';
 
@@ -38,13 +38,5 @@ export class UsersService extends UserServicePort {
     if (!user) throw new NotFoundException('User not found');
 
     return await this.userRepository.update(id, data);
-  }
-
-  findByEmail(email: string): Promise<User | null> {
-    throw new Error('Method not implemented.');
-  }
-
-  create(userData: CreateUserDto): Promise<User> {
-    throw new Error('Method not implemented.');
   }
 }

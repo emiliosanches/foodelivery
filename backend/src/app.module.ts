@@ -3,8 +3,15 @@ import { AppConfigModule } from './infra/config/config.module';
 import { PrismaModule } from './infra/adapters/out/persistence/prisma/prisma.module';
 import { AuthModule } from './infra/adapters/in/rest/modules/auth/auth.module';
 import { UsersModule } from './infra/adapters/in/rest/modules/users/users.module';
+import { RestaurantModule } from './infra/adapters/in/rest/modules/restaurants/restaurant.module';
 
 @Module({
-  imports: [AppConfigModule, PrismaModule, AuthModule, UsersModule],
+  imports: [
+    AppConfigModule,
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    RestaurantModule,
+  ],
 })
 export class AppModule {}
