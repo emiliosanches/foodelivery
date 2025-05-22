@@ -29,7 +29,7 @@ export class AuthService implements AuthServicePort {
       password: hashedPassword,
       name: userData.name,
       phone: userData.phone,
-      role: userData.role,
+      isAdmin: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -50,7 +50,6 @@ export class AuthService implements AuthServicePort {
     const payload = {
       sub: user.id,
       email: user.email,
-      role: user.role,
     };
 
     const { password, ...userWithoutPassword } = user;

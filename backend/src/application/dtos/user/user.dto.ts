@@ -1,4 +1,3 @@
-import { UserRole } from '@/domain/entities/user.entity';
 import {
   IsEmail,
   IsOptional,
@@ -13,7 +12,6 @@ export class CreateUserDto {
   password: string;
   name: string;
   phone?: string;
-  role: UserRole;
 }
 
 export class UpdateUserDto {

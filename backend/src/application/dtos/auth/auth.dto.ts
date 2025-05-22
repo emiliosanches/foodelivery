@@ -6,7 +6,6 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { UserRole } from '@/domain/entities/user.entity';
 
 export class RegisterUserDto {
   @IsEmail()
@@ -24,9 +23,6 @@ export class RegisterUserDto {
   @IsOptional()
   @IsPhoneNumber()
   phone?: string;
-
-  @IsIn(['CUSTOMER', 'RESTAURANT', 'DELIVERY'])
-  role: UserRole;
 }
 
 export class LoginDto {

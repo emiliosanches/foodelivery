@@ -7,11 +7,10 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'; 
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { UpdateUserDto } from '@/application/dtos/user/user.dto'; 
-import { UsersService } from '@/application/services/users.service'; 
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { IsAdminGuard } from '../../common/guards/is-admin.guard';
+import { UpdateUserDto } from '@/application/dtos/user/user.dto';
+import { UsersService } from '@/application/services/users.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '@/domain/entities/user.entity';
 import { UserResponseDto } from '@/application/dtos/user/user-response.dto';
@@ -28,12 +27,11 @@ export class UsersController {
   ) {
     const userId = user.id;
     const result = await this.usersService.update(userId, updateUserDto);
-    
+
     return new UserResponseDto(result);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
@@ -45,7 +43,7 @@ export class UsersController {
 
     const result = await this.usersService.update(id, updateUserDto);
 
-    return new UserResponseDto(result)
+    return new UserResponseDto(result);
   }
 
   @UseGuards(JwtAuthGuard)

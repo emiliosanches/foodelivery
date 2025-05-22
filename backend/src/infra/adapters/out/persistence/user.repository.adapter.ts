@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRepositoryPort } from '@/application/ports/out/repositories/user.repository.port';
 import { User } from '../../../../domain/entities/user.entity';
 import { PrismaService } from './prisma/prisma.service';
+import { UserWithProfileTypeDto } from '@/application/dtos/user/user-with-profile-type.dto';
 
 @Injectable()
 export class UserRepositoryAdapter implements UserRepositoryPort {
@@ -10,6 +11,18 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
   async findById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { id },
+    });
+  }
+
+  async findByIdWithProfileType(
+    id: string,
+  ): Promise<UserWithProfileTypeDto | null> {
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        restaurant: true,
+        deliveryPerson: true,
+      },
     });
   }
 

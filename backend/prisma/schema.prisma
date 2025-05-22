@@ -19,16 +19,343 @@ model User {
   password  String
   name      String
   phone     String?
-  role      Role     @default(CUSTOMER)
+  isAdmin   Boolean  @default(false) @map("is_admin")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  restaurant     Restaurant?
+  deliveryPerson DeliveryPerson?
+  addresses      Address[]
+  paymentMethods PaymentMethod[]
+  orders         Order[]        @relation("CustomerOrders")
+  notifications  Notification[]
+  reviews        Review[]
 
   @@map("users")
 }
 
-enum Role {
-  CUSTOMER
+model Restaurant {
+  id              String  @id @default(uuid())
+  userId          String  @unique @map("user_id")
+  name            String
+  description     String?
+  phone           String
+  email           String
+  imageUrl        String? @map("image_url")
+  isActive        Boolean @default(true) @map("is_active")
+  deliveryFee     Decimal @map("delivery_fee") @db.Decimal(10, 2)
+  deliveryTimeMin Int     @map("delivery_time_min")
+  deliveryTimeMax Int     @map("delivery_time_max")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addresses  Address[]
+  categories Category[]
+  orders     Order[]
+
+  @@map("restaurants")
+}
+
+model DeliveryPerson {
+  id               String       @id @default(uuid())
+  userId           String       @unique @map("user_id")
+  vehicleType      VehicleType  @map("vehicle_type")
+  vehiclePlate     String?      @map("vehicle_plate")
+  driverLicense    String?      @map("driver_license")
+  document         String       @unique
+  documentType     DocumentType @map("document_type")
+  isActive         Boolean      @default(true) @map("is_active")
+  isAvailable      Boolean      @default(true) @map("is_available")
+  currentLatitude  Decimal?     @map("current_latitude") @db.Decimal(10, 8)
+  currentLongitude Decimal?     @map("current_longitude") @db.Decimal(11, 8)
+  rating           Decimal?     @db.Decimal(3, 2)
+  totalDeliveries  Int          @default(0) @map("total_deliveries")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  // Relationships
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries Delivery[]
+
+  @@map("delivery_persons")
+}
+
+model Address {
+  id           String      @id @default(uuid())
+  userId       String?     @map("user_id")
+  restaurantId String?     @map("restaurant_id")
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  postalCode   String      @map("postal_code")
+  country      String      @default("BR")
+  latitude     Decimal     @db.Decimal(10, 8)
+  longitude    Decimal     @db.Decimal(11, 8)
+  isDefault    Boolean     @default(false) @map("is_default")
+  type         AddressType
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  // Relationships
+  user       User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant Restaurant?  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orders     Order[]
+
+  @@map("addresses")
+}
+
+model Category {
+  id           String     @id @default(uuid())
+  restaurantId String     @map("restaurant_id")
+  name         String
+  description  String?
+  imageUrl     String?    @map("image_url")
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  // Relationships
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  menuItems  MenuItem[]
+
+  @@map("categories")
+}
+
+model MenuItem {
+  id                 String      @id @default(uuid())
+  categoryId         String      @map("category_id")
+  name               String
+  description        String?
+  price              Decimal     @db.Decimal(10, 2)
+  imageUrl           String?     @map("image_url")
+  isActive           Boolean     @default(true) @map("is_active")
+  isAvailable        Boolean     @default(true) @map("is_available")
+  preparationTimeMin Int         @map("preparation_time_min")
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  // Relationships
+  category   Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@map("menu_items")
+}
+
+model PaymentMethod {
+  id             String      @id @default(uuid())
+  userId         String      @map("user_id")
+  type           PaymentType
+  cardNumber     String?     @map("card_number")
+  cardHolderName String?     @map("card_holder_name")
+  expiryMonth    String?     @map("expiry_month")
+  expiryYear     String?     @map("expiry_year")
+  brand          String?
+  isDefault      Boolean     @default(false) @map("is_default")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  // Relationships
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@map("payment_methods")
+}
+
+model Order {
+  id                    String       @id @default(uuid())
+  customerId            String       @map("customer_id")
+  restaurantId          String       @map("restaurant_id")
+  deliveryAddressId     String       @map("delivery_address_id")
+  paymentMethodId       String       @map("payment_method_id")
+  status                OrderStatus  @default(PENDING)
+  subtotal              Decimal      @db.Decimal(10, 2)
+  deliveryFee           Decimal      @map("delivery_fee") @db.Decimal(10, 2)
+  totalAmount           Decimal      @map("total_amount") @db.Decimal(10, 2)
+  notes                 String?
+  estimatedDeliveryTime DateTime?    @map("estimated_delivery_time")
+  acceptedAt            DateTime?    @map("accepted_at")
+  readyAt               DateTime?    @map("ready_at")
+  pickedUpAt            DateTime?    @map("picked_up_at")
+  deliveredAt           DateTime?    @map("delivered_at")
+  cancelledAt           DateTime?    @map("cancelled_at")
+  cancellationReason    String?      @map("cancellation_reason")
+  createdAt             DateTime     @default(now()) @map("created_at")
+  updatedAt             DateTime     @updatedAt @map("updated_at")
+
+  // Relationships
+  customer        User          @relation("CustomerOrders", fields: [customerId], references: [id])
+  restaurant      Restaurant    @relation(fields: [restaurantId], references: [id])
+  deliveryAddress Address       @relation(fields: [deliveryAddressId], references: [id])
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  orderItems      OrderItem[]
+  delivery        Delivery?
+  notifications   Notification[]
+  review          Review?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String   @map("order_id")
+  menuItemId String   @map("menu_item_id")
+  quantity   Int
+  unitPrice  Decimal  @map("unit_price") @db.Decimal(10, 2)
+  totalPrice Decimal  @map("total_price") @db.Decimal(10, 2)
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+model Delivery {
+  id               String         @id @default(uuid())
+  orderId          String         @unique @map("order_id")
+  deliveryPersonId String         @map("delivery_person_id")
+  status           DeliveryStatus @default(PENDING)
+  currentLatitude  Decimal?       @map("current_latitude") @db.Decimal(10, 8)
+  currentLongitude Decimal?       @map("current_longitude") @db.Decimal(11, 8)
+  acceptedAt       DateTime?      @map("accepted_at")
+  pickedUpAt       DateTime?      @map("picked_up_at")
+  deliveredAt      DateTime?      @map("delivered_at")
+  notes            String?
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  // Relationships
+  order          Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveryPerson DeliveryPerson    @relation(fields: [deliveryPersonId], references: [id])
+  tracking       DeliveryTracking[]
+
+  @@map("deliveries")
+}
+
+model DeliveryTracking {
+  id         String   @id @default(uuid())
+  deliveryId String   @map("delivery_id")
+  latitude   Decimal  @db.Decimal(10, 8)
+  longitude  Decimal  @db.Decimal(11, 8)
+  timestamp  DateTime
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@map("delivery_tracking")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  orderId   String?          @map("order_id")
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false) @map("is_read")
+  metadata  String?          @db.Text
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  // Relationships
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order Order? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Review {
+  id               String   @id @default(uuid())
+  orderId          String   @unique @map("order_id")
+  customerId       String   @map("customer_id")
+  restaurantId     String   @map("restaurant_id")
+  deliveryPersonId String?  @map("delivery_person_id")
+  restaurantRating Int      @map("restaurant_rating")
+  deliveryRating   Int?     @map("delivery_rating")
+  restaurantComment String? @map("restaurant_comment")
+  deliveryComment  String?  @map("delivery_comment")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customer User  @relation(fields: [customerId], references: [id])
+
+  @@map("reviews")
+}
+
+// Enums
+enum DocumentType {
+  CPF
+  CNPJ
+  SSN
+  NIF
+  DNI
+  PASSPORT
+  NATIONAL_ID
+  OTHER
+}
+
+enum VehicleType {
+  MOTORCYCLE
+  BICYCLE
+  CAR
+  WALKING
+}
+
+enum AddressType {
+  HOME
+  BUSINESS
   RESTAURANT
-  DELIVERY
-  ADMIN
+  OTHER
+}
+
+enum PaymentType {
+  CREDIT_CARD
+  DEBIT_CARD
+  PIX
+  CASH
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  PICKED_UP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  PENDING
+  ACCEPTED
+  PICKING_UP
+  PICKED_UP
+  DELIVERING
+  DELIVERED
+  CANCELLED
+}
+
+enum NotificationType {
+  ORDER_CREATED
+  ORDER_ACCEPTED
+  ORDER_REJECTED
+  ORDER_READY
+  ORDER_PICKED_UP
+  ORDER_OUT_FOR_DELIVERY
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  DELIVERY_ASSIGNED
 }
