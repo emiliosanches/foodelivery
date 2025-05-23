@@ -40,7 +40,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-200 mt-6 pt-6 text-center text-gray-500 text-sm">
-          © {year} mini-food. Todos os direitos reservados.
+          © {year} FooDelivery. Todos os direitos reservados.
         </div>
       </div>
     </footer>

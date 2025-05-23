@@ -8,7 +8,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Mini-food | Sistema de Pedidos e Entregas",
+  title: "FooDelivery | Sistema de Pedidos e Entregas",
   description: "Plataforma de delivery de comida inspirada no iFood",
 };
 

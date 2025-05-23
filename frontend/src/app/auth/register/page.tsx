@@ -43,7 +43,7 @@ export default function RegisterPage() {
     <div className="px-8 py-4">
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold">Create Account</h1>
-        <p className="text-gray-600 mt-1">Join mini-food today</p>
+        <p className="text-gray-600 mt-1">Join FooDelivery today</p>
       </div>
 
       {state.error?.general && (

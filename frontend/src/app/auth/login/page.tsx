@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="p-8 shadow rounded-xl bg-background-secondary">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold">Login</h1>
-          <p className="text-gray-600 mt-1">Access your mini-food account</p>
+          <p className="text-gray-600 mt-1">Access your FooDelivery account</p>
         </div>
 
         {state.error?.general && (

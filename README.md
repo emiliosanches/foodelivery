@@ -1,6 +1,6 @@
-# 🍕 DeliveryApp - Plataforma Completa de Delivery
+# 🍕 FooDelivery - Complete Food Delivery Platform
 
-> **Uma solução moderna e escalável para delivery de comida, construída com as melhores práticas de desenvolvimento**
+> **A modern and scalable food delivery solution built with development best practices**
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
@@ -9,115 +9,105 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 
-## 🚀 Visão Geral
+## 🚀 Overview
 
-O **DeliveryApp** é uma plataforma completa de delivery que conecta **restaurantes**, **entregadores** e **clientes** em um ecossistema digital robusto e eficiente. Desenvolvido com foco em **performance**, **escalabilidade** e **experiência do usuário**.
+**FooDelivery** is a complete delivery platform that connects **restaurants**, **drivers**, and **customers** in a robust and efficient digital ecosystem. Developed with focus on **performance**, **scalability**, and **user experience**.
 
-### ✨ Principais Funcionalidades
+### ✨ Key Features
 
-- 🏪 **Gestão Completa de Restaurantes** - Cardápios, categorias e pedidos
-- 🚚 **Sistema de Entregas Inteligente** - Rastreamento em tempo real
-- 👥 **Multi-perfis de Usuário** - Clientes, restaurantes e entregadores  
-- 💳 **Processamento de Pagamentos** - Múltiplos métodos seguros
-- 📱 **Interface Responsiva** - Experiência otimizada em todos os dispositivos
-- 🔔 **Notificações em Tempo Real** - Atualizações instantâneas de status
-- 📊 **Dashboard Analytics** - Relatórios e métricas detalhadas
+- 🏪 **Complete Restaurant Management** - Menus, categories, and orders
+- 🚚 **Smart Delivery System** - Real-time tracking
+- 👥 **Multi-user Profiles** - Customers, restaurants, and drivers  
+- 💳 **Payment Processing** - Multiple secure payment methods
+- 📱 **Responsive Interface** - Optimized experience across all devices
+- 🔔 **Real-time Notifications** - Instant status updates
+- 📊 **Analytics Dashboard** - Detailed reports and metrics
 
-## 🏗️ Arquitetura do Projeto
+## 🏗️ Project Architecture
 
 ```
-DeliveryApp/
-├── 🎨 frontend/          # Interface React moderna e responsiva
-└── ⚙️  backend/           # API robusta com NestJS e arquitetura hexagonal
+FooDelivery/
+├── 🎨 frontend/          # Modern and responsive React interface
+└── ⚙️  backend/           # Robust API with NestJS and hexagonal architecture
 ```
 
-### 🎯 Backend - API RESTful Enterprise
+### 🎯 Backend - Enterprise RESTful API
 
-- **🏛️ Arquitetura Hexagonal** - Código limpo, testável e mantível
-- **🔐 Autenticação JWT** - Segurança robusta e stateless
+- **🏛️ Hexagonal Architecture** - Clean, testable, and maintainable code
+- **🔐 JWT Authentication** - Robust and stateless security
 - **📊 Prisma ORM** - Type-safe database access
-- **🗄️ PostgreSQL** - Banco relacional performático
-- **📝 TypeScript** - Type safety e melhor DX
-- **🧪 Testes Automatizados** - Cobertura completa de testes
+- **🗄️ PostgreSQL** - High-performance relational database
+- **📝 TypeScript** - Type safety and better DX
+- **🧪 Automated Testing** - Complete test coverage
 
-### 🎨 Frontend - Interface Moderna
+### 🎨 Frontend - Modern Interface
 
-- **⚛️ React 18** - Componentes funcionais e hooks
-- **📱 Design Responsivo** - Mobile-first approach
-- **🎭 UI/UX Intuitiva** - Focada na experiência do usuário
-- **⚡ Performance Otimizada** - Carregamento rápido e eficiente
+- **⚛️ React 18** - Functional components and hooks
+- **📱 Responsive Design** - Mobile-first approach
+- **🎭 Intuitive UI/UX** - Focused on user experience
+- **⚡ Optimized Performance** - Fast and efficient loading
 
-## 🚀 Como Executar
+## 🚀 How to Run
 
-### Pré-requisitos
+### Prerequisites
 - Node.js 18+
 - PostgreSQL 14+
-- npm ou yarn
+- npm or yarn
 
-### 🔧 Configuração Rápida
+### 🔧 Quick Setup
 
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/delivery-app.git
+# Clone the repository
+git clone https://github.com/your-username/delivery-app.git
 cd delivery-app
 
 # Backend
 cd backend
 npm install
 cp .env.example .env
-# Configure suas variáveis de ambiente
+# Configure your environment variables
 npm run prisma:migrate
 npm run dev
 
-# Frontend (em outro terminal)
+# Frontend (in another terminal)
 cd ../frontend
 npm install
 npm run dev
 ```
 
-## 🌟 Destaques Técnicos
+## 🌟 Technical Highlights
 
-### 💎 Qualidade de Código
-- ✅ **Clean Architecture** - Separação clara de responsabilidades
-- ✅ **SOLID Principles** - Código extensível e mantível
-- ✅ **Design Patterns** - Repository, Factory, Strategy
-- ✅ **Type Safety** - 100% TypeScript em todo o projeto
+### 💎 Code Quality
+- ✅ **Clean Architecture** - Clear separation of concerns
+- ✅ **SOLID Principles** - Extensible and maintainable code
+- ✅ **Design Patterns** - Repository, Strategy
+- ✅ **Type Safety** - 100% TypeScript throughout the project
 
-### 🚀 Performance & Escalabilidade
-- ⚡ **Otimizações de Query** - Índices e relacionamentos eficientes
-- 🔄 **Caching Inteligente** - Redis para dados frequentes
-- 📊 **Monitoramento** - Logs estruturados e métricas
-- 🐳 **Containerização** - Docker para deploy consistente
+### 🚀 Performance & Scalability
+- ⚡ **Query Optimizations** - Efficient indexes and relationships
+- 🔄 **Smart Caching** - Redis for frequent data
+- 📊 **Monitoring** - Structured logs and metrics
+- 🐳 **Containerization** - Docker for consistent deployment
+- 🔀 **Horizontal Scaling** - Multiple containers with WebSockets synchronized via Redis
 
-### 🔒 Segurança
-- 🛡️ **Autenticação Robusta** - JWT com refresh tokens
-- 🔐 **Validação de Dados** - Sanitização e validação rigorosa
-- 🚨 **Rate Limiting** - Proteção contra ataques
-- 🔑 **Criptografia** - Dados sensíveis protegidos
+### 🔒 Security
+- 🛡️ **Robust Authentication** - JWT with refresh tokens
+- 🔐 **Data Validation** - Rigorous sanitization and validation
+- 🔑 **Encryption** - Protected sensitive data
 
 ## 📈 Roadmap
 
-- [ ] 🔔 **Notificações Push** - WebSockets para atualizações real-time
-- [ ] 📱 **App Mobile** - React Native para iOS e Android
-- [ ] 🤖 **IA Recomendações** - Sistema de recomendação inteligente
-- [ ] 📊 **Analytics Avançado** - Dashboard com insights de negócio
-- [ ] 🌍 **Multi-idioma** - Suporte a internacionalização
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Veja nosso [guia de contribuição](CONTRIBUTING.md) para começar.
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+- [ ] 🔔 **Push Notifications** - WebSockets for real-time updates
+- [ ] 📊 **Analytics Dashboard** - Restaurant performance metrics (daily orders, monthly revenue, best-selling products)
+- [ ] 🌍 **Multi-language** - Internationalization support
 
 ---
 
 <div align="center">
-  <p><strong>Desenvolvido com ❤️ para revolucionar o delivery</strong></p>
+  <p><strong>Developed with ❤️ by Emilio</strong></p>
   <p>
-    <a href="https://linkedin.com/in/seu-perfil">LinkedIn</a> •
-    <a href="https://github.com/seu-usuario">GitHub</a> •
-    <a href="mailto:seu-email@example.com">Email</a>
+    <a href="https://linkedin.com/in/emiliosanches">LinkedIn</a> •
+    <a href="https://github.com/emiliosanches">GitHub</a> •
+    <a href="mailto:emiliosneto13@gmail.com">Email</a>
   </p>
 </div>
