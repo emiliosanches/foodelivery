@@ -1,17 +1,35 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from './prisma/prisma.service';
 import { AddressRepositoryPort } from '@/application/ports/out/repositories/address.repository.port';
 import { Address } from '@/domain/entities/address.entity';
-import { PrismaService } from './prisma/prisma.service';
 
 @Injectable()
 export class AddressRepositoryAdapter extends AddressRepositoryPort {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(private prisma: PrismaService) {
     super();
   }
 
   async create(address: Address): Promise<Address> {
     return this.prisma.address.create({
-      data: address,
+      data: {
+        id: address.id,
+        userId: address.userId,
+        restaurantId: address.restaurantId,
+        street: address.street,
+        number: address.number,
+        complement: address.complement,
+        neighborhood: address.neighborhood,
+        city: address.city,
+        state: address.state,
+        postalCode: address.postalCode,
+        country: address.country,
+        latitude: address.latitude,
+        longitude: address.longitude,
+        isDefault: address.isDefault,
+        type: address.type,
+        createdAt: address.createdAt,
+        updatedAt: address.updatedAt,
+      },
     });
   }
 
@@ -23,28 +41,33 @@ export class AddressRepositoryAdapter extends AddressRepositoryPort {
 
   async findByUserId(userId: string): Promise<Address[]> {
     return this.prisma.address.findMany({
-      where: { userId },
+      where: {
+        userId,
+      },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   }
 
-  async findByRestaurantId(restaurantId: string): Promise<Address[]> {
-    return this.prisma.address.findMany({
-      where: { restaurantId },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  async update(id: string, address: Partial<Address>): Promise<Address> {
+  async update(id: string, data: Partial<Address>): Promise<Address> {
     return this.prisma.address.update({
       where: { id },
-      data: address,
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
     });
   }
 
   async delete(id: string): Promise<void> {
     await this.prisma.address.delete({
       where: { id },
+    });
+  }
+
+  async findByRestaurantId(restaurantId: string): Promise<Address> {
+    return this.prisma.address.findFirst({
+      where: { restaurantId },
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   }
 
@@ -58,15 +81,32 @@ export class AddressRepositoryAdapter extends AddressRepositoryPort {
   }
 
   async setDefaultAddress(userId: string, addressId: string): Promise<void> {
-    await this.prisma.$transaction([
-      this.prisma.address.updateMany({
-        where: { userId },
-        data: { isDefault: false },
-      }),
-      this.prisma.address.update({
+    await this.prisma.$transaction(async (tx) => {
+      await tx.address.findUniqueOrThrow({
+        where: {
+          id: addressId,
+          userId,
+        },
+      });
+
+      await tx.address.updateMany({
+        where: {
+          userId,
+          isDefault: true,
+        },
+        data: {
+          isDefault: false,
+          updatedAt: new Date(),
+        },
+      });
+
+      await tx.address.update({
         where: { id: addressId },
-        data: { isDefault: true },
-      }),
-    ]);
+        data: {
+          isDefault: true,
+          updatedAt: new Date(),
+        },
+      });
+    });
   }
 }

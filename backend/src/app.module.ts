@@ -4,6 +4,7 @@ import { PrismaModule } from './infra/adapters/out/persistence/prisma/prisma.mod
 import { AuthModule } from './infra/adapters/in/rest/modules/auth/auth.module';
 import { UsersModule } from './infra/adapters/in/rest/modules/users/users.module';
 import { RestaurantModule } from './infra/adapters/in/rest/modules/restaurants/restaurant.module';
+import { AddressModule } from './infra/adapters/in/rest/modules/address/address.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { RestaurantModule } from './infra/adapters/in/rest/modules/restaurants/r
     AuthModule,
     UsersModule,
     RestaurantModule,
+    AddressModule,
   ],
 })
 export class AppModule {}
