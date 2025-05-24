@@ -201,7 +201,7 @@ docker run -p 3000:3000 delivery-api
 - [ ] 🧪 **E2E Tests** - End-to-end integration tests
 - [ ] 📚 **Swagger Documentation** - Interactive API docs
 - [ ] 🔔 **WebSockets** - Real-time notifications
-- [ ] 📊 **Metrics** - Prometheus & Grafana
+- [ ] 📊 **In-App Payment** - Stripe API (Sandbox) to simulate payments
 - [ ] 🐳 **Kubernetes** - Container orchestration
 - [ ] 🚀 **CI/CD** - Automated pipeline
 

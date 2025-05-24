@@ -148,17 +148,18 @@ model MenuItem {
 }
 
 model PaymentMethod {
-  id             String      @id @default(uuid())
-  userId         String      @map("user_id")
-  type           PaymentType
-  cardNumber     String?     @map("card_number")
-  cardHolderName String?     @map("card_holder_name")
-  expiryMonth    String?     @map("expiry_month")
-  expiryYear     String?     @map("expiry_year")
-  brand          String?
-  isDefault      Boolean     @default(false) @map("is_default")
-  createdAt      DateTime    @default(now()) @map("created_at")
-  updatedAt      DateTime    @updatedAt @map("updated_at")
+  id                      String      @id @default(uuid())
+  userId                  String      @map("user_id")
+  type                    PaymentType
+  providerPaymentMethodId String      @map("provider_payment_method_id")
+  cardHolderName          String?     @map("card_holder_name")
+  expiryMonth             String?     @map("expiry_month")
+  expiryYear              String?     @map("expiry_year")
+  lastFourDigits          String      @map("last_four_digits")
+  cardBrand               String?     @map("card_brand")
+  isDefault               Boolean     @default(false) @map("is_default")
+  createdAt               DateTime    @default(now()) @map("created_at")
+  updatedAt               DateTime    @updatedAt @map("updated_at")
 
   // Relationships
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -323,8 +324,6 @@ enum AddressType {
 enum PaymentType {
   CREDIT_CARD
   DEBIT_CARD
-  PIX
-  CASH
 }
 
 enum OrderStatus {

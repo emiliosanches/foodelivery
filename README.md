@@ -97,6 +97,7 @@ npm run dev
 
 ## 📈 Roadmap
 
+- [ ] 🔔 **In-App Payments** - WebSockets for real-time updates
 - [ ] 🔔 **Push Notifications** - WebSockets for real-time updates
 - [ ] 📊 **Analytics Dashboard** - Restaurant performance metrics (daily orders, monthly revenue, best-selling products)
 - [ ] 🌍 **Multi-language** - Internationalization support

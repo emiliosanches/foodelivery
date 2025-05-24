@@ -5,6 +5,7 @@ import { AuthModule } from './infra/adapters/in/rest/modules/auth/auth.module';
 import { UsersModule } from './infra/adapters/in/rest/modules/users/users.module';
 import { RestaurantModule } from './infra/adapters/in/rest/modules/restaurants/restaurant.module';
 import { AddressModule } from './infra/adapters/in/rest/modules/address/address.module';
+import { PaymentMethodModule } from './infra/adapters/in/rest/modules/payment-methods/payment-method.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AddressModule } from './infra/adapters/in/rest/modules/address/address.
     UsersModule,
     RestaurantModule,
     AddressModule,
+    PaymentMethodModule,
   ],
 })
 export class AppModule {}
