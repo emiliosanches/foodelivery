@@ -169,31 +169,33 @@ model PaymentMethod {
 }
 
 model Order {
-  id                    String      @id @default(uuid())
-  customerId            String      @map("customer_id")
-  restaurantId          String      @map("restaurant_id")
-  deliveryAddressId     String      @map("delivery_address_id")
-  paymentMethodId       String      @map("payment_method_id")
-  status                OrderStatus @default(PENDING)
+  id                    String           @id @default(uuid())
+  customerId            String           @map("customer_id")
+  restaurantId          String           @map("restaurant_id")
+  deliveryAddressId     String           @map("delivery_address_id")
+  paymentType           OrderPaymentType @map("payment_type")
+  paymentMethodId       String?          @map("payment_method_id")
+  paymentData           Json?            @map("payment_data") @db.JsonB
+  status                OrderStatus      @default(PENDING)
   subtotal              Int
-  deliveryFee           Int         @map("delivery_fee")
-  totalAmount           Int         @map("total_amount")
+  deliveryFee           Int              @map("delivery_fee")
+  totalAmount           Int              @map("total_amount")
   notes                 String?
-  estimatedDeliveryTime DateTime?   @map("estimated_delivery_time")
-  acceptedAt            DateTime?   @map("accepted_at")
-  readyAt               DateTime?   @map("ready_at")
-  pickedUpAt            DateTime?   @map("picked_up_at")
-  deliveredAt           DateTime?   @map("delivered_at")
-  cancelledAt           DateTime?   @map("cancelled_at")
-  cancellationReason    String?     @map("cancellation_reason")
-  createdAt             DateTime    @default(now()) @map("created_at")
-  updatedAt             DateTime    @updatedAt @map("updated_at")
+  estimatedDeliveryTime DateTime?        @map("estimated_delivery_time")
+  acceptedAt            DateTime?        @map("accepted_at")
+  readyAt               DateTime?        @map("ready_at")
+  pickedUpAt            DateTime?        @map("picked_up_at")
+  deliveredAt           DateTime?        @map("delivered_at")
+  cancelledAt           DateTime?        @map("cancelled_at")
+  cancellationReason    String?          @map("cancellation_reason")
+  createdAt             DateTime         @default(now()) @map("created_at")
+  updatedAt             DateTime         @updatedAt @map("updated_at")
 
   // Relationships
   customer        User           @relation("CustomerOrders", fields: [customerId], references: [id])
   restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
   deliveryAddress Address        @relation(fields: [deliveryAddressId], references: [id])
-  paymentMethod   PaymentMethod  @relation(fields: [paymentMethodId], references: [id])
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
   orderItems      OrderItem[]
   delivery        Delivery?
   notifications   Notification[]
@@ -203,15 +205,18 @@ model Order {
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  orderId    String   @map("order_id")
-  menuItemId String   @map("menu_item_id")
-  quantity   Int
-  unitPrice  Int      @map("unit_price")
-  totalPrice Int      @map("total_price")
-  notes      String?
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(uuid())
+  orderId            String   @map("order_id")
+  menuItemId         String   @map("menu_item_id")
+  productName        String   @map("product_name")
+  productDescription String?  @map("product_description")
+  productImageUrl    String?  @map("product_image_url")
+  quantity           Int
+  unitPrice          Int      @map("unit_price")
+  totalPrice         Int      @map("total_price")
+  notes              String?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   // Relationships
   order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -326,12 +331,17 @@ enum PaymentType {
   DEBIT_CARD
 }
 
+enum OrderPaymentType {
+  STORED_CARD
+  PIX
+  CASH
+}
+
 enum OrderStatus {
   PENDING
   ACCEPTED
   PREPARING
   READY
-  PICKED_UP
   OUT_FOR_DELIVERY
   DELIVERED
   CANCELLED

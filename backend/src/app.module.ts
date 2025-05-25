@@ -6,6 +6,7 @@ import { UsersModule } from './infra/adapters/in/rest/modules/users/users.module
 import { RestaurantModule } from './infra/adapters/in/rest/modules/restaurants/restaurant.module';
 import { AddressModule } from './infra/adapters/in/rest/modules/address/address.module';
 import { PaymentMethodModule } from './infra/adapters/in/rest/modules/payment-methods/payment-method.module';
+import { OrderModule } from './infra/adapters/in/rest/modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PaymentMethodModule } from './infra/adapters/in/rest/modules/payment-me
     RestaurantModule,
     AddressModule,
     PaymentMethodModule,
+    OrderModule,
   ],
 })
 export class AppModule {}

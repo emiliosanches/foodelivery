@@ -13,6 +13,10 @@ import { RestaurantRepositoryPort } from '@/application/ports/out/repositories/r
 import { CategoryRepositoryPort } from '@/application/ports/out/repositories/category.repository.port';
 import { MenuItemRepositoryPort } from '@/application/ports/out/repositories/menu-item.repository.port';
 import { AddressRepositoryPort } from '@/application/ports/out/repositories/address.repository.port';
+import { PaymentMethodRepositoryPort } from '@/application/ports/out/repositories/payment-method.repository.port';
+import { PaymentMethodRepositoryAdapter } from '../payment-method.repository.adapter';
+import { OrderRepositoryPort } from '@/application/ports/out/repositories/order.repository.port';
+import { OrderRepositoryAdapter } from '../order.repository';
 
 @Module({
   providers: [
@@ -25,6 +29,14 @@ import { AddressRepositoryPort } from '@/application/ports/out/repositories/addr
     { provide: CategoryRepositoryPort, useClass: CategoryRepositoryAdapter },
     { provide: MenuItemRepositoryPort, useClass: MenuItemRepositoryAdapter },
     { provide: AddressRepositoryPort, useClass: AddressRepositoryAdapter },
+    {
+      provide: PaymentMethodRepositoryPort,
+      useClass: PaymentMethodRepositoryAdapter,
+    },
+    {
+      provide: OrderRepositoryPort,
+      useClass: OrderRepositoryAdapter,
+    },
   ],
   exports: [
     PrismaService,
@@ -33,6 +45,8 @@ import { AddressRepositoryPort } from '@/application/ports/out/repositories/addr
     CategoryRepositoryPort,
     MenuItemRepositoryPort,
     AddressRepositoryPort,
+    PaymentMethodRepositoryPort,
+    OrderRepositoryPort,
   ],
 })
 export class PrismaModule {}

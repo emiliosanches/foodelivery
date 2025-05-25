@@ -21,6 +21,15 @@ export class MenuItemRepositoryAdapter extends MenuItemRepositoryPort {
     });
   }
 
+  async findByIdAndRestaurantId(
+    id: string,
+    restaurantId: string,
+  ): Promise<MenuItem | null> {
+    return this.prisma.menuItem.findUnique({
+      where: { id, category: { restaurantId } },
+    });
+  }
+
   async findByCategoryId(categoryId: string): Promise<MenuItem[]> {
     return this.prisma.menuItem.findMany({
       where: { categoryId },
