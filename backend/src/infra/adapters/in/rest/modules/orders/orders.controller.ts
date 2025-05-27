@@ -18,7 +18,6 @@ import { RestaurantOwnerGuard } from '@/infra/adapters/in/rest/common/guards/res
 import { OrderAccessGuard } from '@/infra/adapters/in/rest/common/guards/order-access.guard';
 import { OrderServicePort } from '@/application/ports/in/services/order.service.port';
 import { CreateOrderDto } from '@/application/dtos/order/create-order.dto';
-import { UpdateOrderStatusDto } from '@/application/dtos/order/update-order-status.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '@/domain/entities/user.entity';
 
@@ -105,21 +104,6 @@ export class OrderController {
       newStatus: 'CANCELLED',
       reason: reason || 'Rejected by restaurant',
     });
-  }
-
-  @Patch('restaurants/:restaurantId/orders/:orderId/status')
-  @UseGuards(RestaurantOwnerGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updateOrderStatus(
-    @Param('restaurantId') restaurantId: string,
-    @Param('orderId') orderId: string,
-    @Body() updateStatusDto: UpdateOrderStatusDto,
-  ) {
-    await this.orderService.updateRestaurantOrderStatus(
-      restaurantId,
-      orderId,
-      updateStatusDto,
-    );
   }
 
   @Patch('restaurants/:restaurantId/orders/:orderId/preparing')
