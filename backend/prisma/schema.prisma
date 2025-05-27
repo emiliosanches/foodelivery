@@ -60,21 +60,19 @@ model Restaurant {
 }
 
 model DeliveryPerson {
-  id               String       @id @default(uuid())
-  userId           String       @unique @map("user_id")
-  vehicleType      VehicleType  @map("vehicle_type")
-  vehiclePlate     String?      @map("vehicle_plate")
-  driverLicense    String?      @map("driver_license")
-  document         String       @unique
-  documentType     DocumentType @map("document_type")
-  isActive         Boolean      @default(true) @map("is_active")
-  isAvailable      Boolean      @default(true) @map("is_available")
-  currentLatitude  Float?       @map("current_latitude") @db.DoublePrecision
-  currentLongitude Float?       @map("current_longitude") @db.DoublePrecision
-  rating           Float?       @db.DoublePrecision
-  totalDeliveries  Int          @default(0) @map("total_deliveries")
-  createdAt        DateTime     @default(now()) @map("created_at")
-  updatedAt        DateTime     @updatedAt @map("updated_at")
+  id               String                     @id @default(uuid())
+  userId           String                     @unique @map("user_id")
+  vehicleType      VehicleType                @map("vehicle_type")
+  vehiclePlate     String?                    @map("vehicle_plate")
+  availability     DeliveryPersonAvailability @default(OFFLINE)
+  currentLatitude  Float?                     @map("current_latitude") @db.DoublePrecision
+  currentLongitude Float?                     @map("current_longitude") @db.DoublePrecision
+  rating           Float?                     @db.DoublePrecision
+  totalDeliveries  Int                        @default(0) @map("total_deliveries")
+  deliveryRadius   Float                      @default(5.0) @map("delivery_radius")
+  createdAt        DateTime                   @default(now()) @map("created_at")
+  updatedAt        DateTime                   @updatedAt @map("updated_at")
+  lastOnlineAt     DateTime?                  @map("last_online_at")
 
   // Relationships
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -235,30 +233,14 @@ model Delivery {
   acceptedAt       DateTime?      @map("accepted_at")
   pickedUpAt       DateTime?      @map("picked_up_at")
   deliveredAt      DateTime?      @map("delivered_at")
-  notes            String?
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
 
   // Relationships
-  order          Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  deliveryPerson DeliveryPerson     @relation(fields: [deliveryPersonId], references: [id])
-  tracking       DeliveryTracking[]
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveryPerson DeliveryPerson @relation(fields: [deliveryPersonId], references: [id])
 
   @@map("deliveries")
-}
-
-model DeliveryTracking {
-  id         String   @id @default(uuid())
-  deliveryId String   @map("delivery_id")
-  latitude   Float    @db.DoublePrecision
-  longitude  Float    @db.DoublePrecision
-  timestamp  DateTime
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  // Relationships
-  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-
-  @@map("delivery_tracking")
 }
 
 model Notification {
@@ -312,11 +294,16 @@ enum DocumentType {
   OTHER
 }
 
+enum DeliveryPersonAvailability {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
 enum VehicleType {
   MOTORCYCLE
   BICYCLE
   CAR
-  WALKING
 }
 
 enum AddressType {
@@ -350,11 +337,8 @@ enum OrderStatus {
 enum DeliveryStatus {
   PENDING
   ACCEPTED
-  PICKING_UP
   PICKED_UP
-  DELIVERING
   DELIVERED
-  CANCELLED
 }
 
 enum NotificationType {
