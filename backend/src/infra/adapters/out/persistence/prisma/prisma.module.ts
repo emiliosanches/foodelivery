@@ -17,6 +17,8 @@ import { PaymentMethodRepositoryPort } from '@/application/ports/out/repositorie
 import { PaymentMethodRepositoryAdapter } from '../payment-method.repository.adapter';
 import { OrderRepositoryPort } from '@/application/ports/out/repositories/order.repository.port';
 import { OrderRepositoryAdapter } from '../order.repository';
+import { DeliveryPersonRepositoryPort } from '@/application/ports/out/repositories/delivery-person.repository.port';
+import { DeliveryPersonRepositoryAdapter } from '../delivery-person.repository.adapter';
 
 @Module({
   providers: [
@@ -37,6 +39,10 @@ import { OrderRepositoryAdapter } from '../order.repository';
       provide: OrderRepositoryPort,
       useClass: OrderRepositoryAdapter,
     },
+    {
+      provide: DeliveryPersonRepositoryPort,
+      useClass: DeliveryPersonRepositoryAdapter,
+    },
   ],
   exports: [
     PrismaService,
@@ -47,6 +53,7 @@ import { OrderRepositoryAdapter } from '../order.repository';
     AddressRepositoryPort,
     PaymentMethodRepositoryPort,
     OrderRepositoryPort,
+    DeliveryPersonRepositoryPort,
   ],
 })
 export class PrismaModule {}

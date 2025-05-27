@@ -7,6 +7,8 @@ import { RestaurantModule } from './infra/adapters/in/rest/modules/restaurants/r
 import { AddressModule } from './infra/adapters/in/rest/modules/address/address.module';
 import { PaymentMethodModule } from './infra/adapters/in/rest/modules/payment-methods/payment-method.module';
 import { OrderModule } from './infra/adapters/in/rest/modules/orders/orders.module';
+import { Delivery } from './domain/delivery';
+import { DeliveryPersonModule } from './infra/adapters/in/rest/modules/delivery-person/delivery-person.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { OrderModule } from './infra/adapters/in/rest/modules/orders/orders.modu
     AddressModule,
     PaymentMethodModule,
     OrderModule,
+    Delivery,
+    DeliveryPersonModule,
   ],
 })
 export class AppModule {}
