@@ -51,16 +51,29 @@ export class MenuItemRepositoryAdapter extends MenuItemRepositoryPort {
     });
   }
 
-  async update(id: string, menuItem: Partial<MenuItem>): Promise<MenuItem> {
+  async update(
+    query: { id: string; restaurantId: string },
+    menuItem: Partial<MenuItem>,
+  ): Promise<MenuItem> {
     return this.prisma.menuItem.update({
-      where: { id },
+      where: {
+        id: query.id,
+        category: {
+          restaurantId: query.restaurantId,
+        },
+      },
       data: menuItem,
     });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(query: { id: string; restaurantId: string }): Promise<void> {
     await this.prisma.menuItem.delete({
-      where: { id },
+      where: {
+        id: query.id,
+        category: {
+          restaurantId: query.restaurantId,
+        },
+      },
     });
   }
 

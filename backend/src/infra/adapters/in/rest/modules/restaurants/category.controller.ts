@@ -14,13 +14,14 @@ import { CreateCategoryDto } from '@/application/dtos/category/create-category.d
 import { UpdateCategoryDto } from '@/application/dtos/category/update-category.dto';
 import { JwtAuthGuard } from '@/infra/adapters/in/rest/common/guards/jwt-auth.guard';
 import { Category } from '@/domain/entities/category.entity';
+import { RestaurantOwnerGuard } from '../../common/guards/restaurant-owner.guard';
 
 @Controller('restaurants/:restaurantId/categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryServicePort) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RestaurantOwnerGuard)
   async create(
     @Param('restaurantId') restaurantId: string,
     @Body() createCategoryDto: CreateCategoryDto,
@@ -41,7 +42,7 @@ export class CategoryController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RestaurantOwnerGuard)
   async update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -50,13 +51,13 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RestaurantOwnerGuard)
   async remove(@Param('id') id: string): Promise<void> {
     return this.categoryService.delete(id);
   }
 
   @Patch(':id/toggle-status')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RestaurantOwnerGuard)
   async toggleStatus(@Param('id') id: string): Promise<Category> {
     return this.categoryService.toggleStatus(id);
   }

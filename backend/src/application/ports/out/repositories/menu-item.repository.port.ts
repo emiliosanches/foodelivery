@@ -9,8 +9,11 @@ export abstract class MenuItemRepositoryPort {
   ): Promise<MenuItem | null>;
   abstract findByCategoryId(categoryId: string): Promise<MenuItem[]>;
   abstract findByRestaurantId(restaurantId: string): Promise<MenuItem[]>;
-  abstract update(id: string, menuItem: Partial<MenuItem>): Promise<MenuItem>;
-  abstract delete(id: string): Promise<void>;
+  abstract update(
+    query: { id: string; restaurantId: string },
+    menuItem: Partial<MenuItem>,
+  ): Promise<MenuItem>;
+  abstract delete(query: { id: string; restaurantId: string }): Promise<void>;
   abstract findByName(
     categoryId: string,
     name: string,

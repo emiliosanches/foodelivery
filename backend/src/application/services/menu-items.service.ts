@@ -10,24 +10,39 @@ import { CreateMenuItemDto } from '@/application/dtos/menu-item/create-menu-item
 import { UpdateMenuItemDto } from '@/application/dtos/menu-item/update-menu-item.dto';
 import { MenuItem } from '@/domain/entities/menu-item.entity';
 import { v7 } from 'uuid';
+import { CategoryRepositoryPort } from '../ports/out/repositories/category.repository.port';
 
 @Injectable()
 export class MenuItemService extends MenuItemServicePort {
-  constructor(private readonly menuItemRepository: MenuItemRepositoryPort) {
+  constructor(
+    private readonly menuItemRepository: MenuItemRepositoryPort,
+    private readonly categoryRepository: CategoryRepositoryPort,
+  ) {
     super();
   }
 
   async create(
-    categoryId: string,
+    restaurantId: string,
     menuItemData: CreateMenuItemDto,
   ): Promise<MenuItem> {
+    const category = await this.categoryRepository.findById(
+      menuItemData.categoryId,
+    );
+
+    if (!category) throw new NotFoundException('Category not found');
+
+    if (category.restaurantId !== restaurantId)
+      throw new BadRequestException(
+        'Informed category does not belong to specified restaurant',
+      );
+
     const existingMenuItem = await this.menuItemRepository.findByName(
-      categoryId,
+      restaurantId,
       menuItemData.name,
     );
     if (existingMenuItem) {
       throw new ConflictException(
-        'Menu item name already exists in this category',
+        'Menu item name already exists in this restaurant',
       );
     }
 
@@ -43,7 +58,7 @@ export class MenuItemService extends MenuItemServicePort {
 
     return this.menuItemRepository.create({
       id: v7(),
-      categoryId,
+      categoryId: category.id,
       name: menuItemData.name,
       description: menuItemData.description,
       price: menuItemData.price,
@@ -60,15 +75,15 @@ export class MenuItemService extends MenuItemServicePort {
     return this.menuItemRepository.findById(id);
   }
 
-  async findByCategoryId(categoryId: string): Promise<MenuItem[]> {
-    return this.menuItemRepository.findByCategoryId(categoryId);
-  }
-
   async findByRestaurantId(restaurantId: string): Promise<MenuItem[]> {
     return this.menuItemRepository.findByRestaurantId(restaurantId);
   }
 
-  async update(id: string, menuItemData: UpdateMenuItemDto): Promise<MenuItem> {
+  async update(
+    id: string,
+    restaurantId: string,
+    menuItemData: UpdateMenuItemDto,
+  ): Promise<MenuItem> {
     const menuItem = await this.menuItemRepository.findById(id);
     if (!menuItem) {
       throw new NotFoundException('Menu item not found');
@@ -104,39 +119,48 @@ export class MenuItemService extends MenuItemServicePort {
       updatedAt: new Date(),
     };
 
-    return this.menuItemRepository.update(id, updatedData);
+    return this.menuItemRepository.update({ id, restaurantId }, updatedData);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, restaurantId: string): Promise<void> {
     const menuItem = await this.menuItemRepository.findById(id);
     if (!menuItem) {
       throw new NotFoundException('Menu item not found');
     }
 
-    await this.menuItemRepository.delete(id);
+    await this.menuItemRepository.delete({ id, restaurantId });
   }
 
-  async toggleActive(id: string): Promise<MenuItem> {
+  async toggleActive(id: string, restaurantId: string): Promise<MenuItem> {
     const menuItem = await this.menuItemRepository.findById(id);
     if (!menuItem) {
       throw new NotFoundException('Menu item not found');
     }
 
-    return this.menuItemRepository.update(id, {
-      isActive: !menuItem.isActive,
-      updatedAt: new Date(),
-    });
+    return this.menuItemRepository.update(
+      { id, restaurantId },
+      {
+        isActive: !menuItem.isActive,
+        updatedAt: new Date(),
+      },
+    );
   }
 
-  async toggleAvailability(id: string): Promise<MenuItem> {
+  async toggleAvailability(
+    id: string,
+    restaurantId: string,
+  ): Promise<MenuItem> {
     const menuItem = await this.menuItemRepository.findById(id);
     if (!menuItem) {
       throw new NotFoundException('Menu item not found');
     }
 
-    return this.menuItemRepository.update(id, {
-      isAvailable: !menuItem.isAvailable,
-      updatedAt: new Date(),
-    });
+    return this.menuItemRepository.update(
+      { id, restaurantId },
+      {
+        isAvailable: !menuItem.isAvailable,
+        updatedAt: new Date(),
+      },
+    );
   }
 }
