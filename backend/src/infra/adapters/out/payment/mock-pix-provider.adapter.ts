@@ -31,7 +31,8 @@ export class MockPixProviderAdapter extends PixProviderPort {
     };
   }
 
-  private generateMockQrCodeImage(_: string): string {
+  private generateMockQrCodeImage(code: string): string {
+    console.log(code);
     return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
   }
 }

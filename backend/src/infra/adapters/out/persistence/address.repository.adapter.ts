@@ -14,7 +14,6 @@ export class AddressRepositoryAdapter extends AddressRepositoryPort {
       data: {
         id: address.id,
         userId: address.userId,
-        restaurantId: address.restaurantId,
         street: address.street,
         number: address.number,
         complement: address.complement,
@@ -61,13 +60,6 @@ export class AddressRepositoryAdapter extends AddressRepositoryPort {
   async delete(id: string): Promise<void> {
     await this.prisma.address.delete({
       where: { id },
-    });
-  }
-
-  async findByRestaurantId(restaurantId: string): Promise<Address> {
-    return this.prisma.address.findFirst({
-      where: { restaurantId },
-      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   }
 

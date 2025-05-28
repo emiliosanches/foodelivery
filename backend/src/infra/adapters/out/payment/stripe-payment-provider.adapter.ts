@@ -73,6 +73,7 @@ export class StripePaymentProviderAdapter extends PaymentProviderPort {
   }
 
   async processPayment(request: ProcessPaymentRequest): Promise<PaymentResult> {
+    console.log(request);
     try {
       // example
       // const paymentIntent = await this.stripe.paymentIntents.create({
@@ -104,6 +105,8 @@ export class StripePaymentProviderAdapter extends PaymentProviderPort {
     transactionId: string,
     amount?: number,
   ): Promise<PaymentResult> {
+    console.log({ transactionId, amount });
+
     try {
       // example
       // const refund = await this.stripe.refunds.create({
@@ -127,6 +130,7 @@ export class StripePaymentProviderAdapter extends PaymentProviderPort {
   }
 
   async createCustomer(email: string, name: string): Promise<string> {
+    console.log({ email, name });
     try {
       // example
       // const customer = await this.stripe.customers.create({

@@ -9,5 +9,5 @@ export class MenuItem {
   isAvailable: boolean;
   preparationTimeMin: number;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }

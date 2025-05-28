@@ -3,7 +3,6 @@ export type AddressType = 'HOME' | 'BUSINESS' | 'RESTAURANT' | 'OTHER';
 export class Address {
   id: string;
   userId?: string;
-  restaurantId?: string;
   street: string;
   number: string;
   complement?: string;

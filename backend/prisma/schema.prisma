@@ -42,6 +42,7 @@ model Restaurant {
   description     String?
   phone           String
   email           String   @unique
+  addressId       String   @unique @map("address_id")
   imageUrl        String?  @map("image_url")
   isActive        Boolean  @default(true) @map("is_active")
   deliveryFee     Int      @map("delivery_fee")
@@ -52,7 +53,7 @@ model Restaurant {
 
   // Relationships
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  addresses  Address[]
+  address    Address    @relation(fields: [addressId], references: [id], onDelete: Cascade)
   categories Category[]
   orders     Order[]
 
@@ -60,21 +61,19 @@ model Restaurant {
 }
 
 model DeliveryPerson {
-  id               String       @id @default(uuid())
-  userId           String       @unique @map("user_id")
-  vehicleType      VehicleType  @map("vehicle_type")
-  vehiclePlate     String?      @map("vehicle_plate")
-  driverLicense    String?      @map("driver_license")
-  document         String       @unique
-  documentType     DocumentType @map("document_type")
-  isActive         Boolean      @default(true) @map("is_active")
-  isAvailable      Boolean      @default(true) @map("is_available")
-  currentLatitude  Float?       @map("current_latitude") @db.DoublePrecision
-  currentLongitude Float?       @map("current_longitude") @db.DoublePrecision
-  rating           Float?       @db.DoublePrecision
-  totalDeliveries  Int          @default(0) @map("total_deliveries")
-  createdAt        DateTime     @default(now()) @map("created_at")
-  updatedAt        DateTime     @updatedAt @map("updated_at")
+  id               String                     @id @default(uuid())
+  userId           String                     @unique @map("user_id")
+  vehicleType      VehicleType                @map("vehicle_type")
+  vehiclePlate     String?                    @map("vehicle_plate")
+  availability     DeliveryPersonAvailability @default(OFFLINE)
+  currentLatitude  Float?                     @map("current_latitude") @db.DoublePrecision
+  currentLongitude Float?                     @map("current_longitude") @db.DoublePrecision
+  rating           Float?                     @db.DoublePrecision
+  totalDeliveries  Int                        @default(0) @map("total_deliveries")
+  deliveryRadius   Float                      @default(5.0) @map("delivery_radius")
+  createdAt        DateTime                   @default(now()) @map("created_at")
+  updatedAt        DateTime                   @updatedAt @map("updated_at")
+  lastOnlineAt     DateTime?                  @map("last_online_at")
 
   // Relationships
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -86,7 +85,6 @@ model DeliveryPerson {
 model Address {
   id           String      @id @default(uuid())
   userId       String?     @map("user_id")
-  restaurantId String?     @map("restaurant_id")
   street       String
   number       String
   complement   String?
@@ -104,7 +102,7 @@ model Address {
 
   // Relationships
   user       User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  restaurant Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurant Restaurant?
   orders     Order[]
 
   @@map("addresses")
@@ -136,7 +134,7 @@ model MenuItem {
   imageUrl           String?  @map("image_url")
   isActive           Boolean  @default(true) @map("is_active")
   isAvailable        Boolean  @default(true) @map("is_available")
-  preparationTimeMin Int      @map("preparation_time_min")
+  preparationTimeMin Int?     @map("preparation_time_min")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
@@ -169,31 +167,33 @@ model PaymentMethod {
 }
 
 model Order {
-  id                    String      @id @default(uuid())
-  customerId            String      @map("customer_id")
-  restaurantId          String      @map("restaurant_id")
-  deliveryAddressId     String      @map("delivery_address_id")
-  paymentMethodId       String      @map("payment_method_id")
-  status                OrderStatus @default(PENDING)
+  id                    String           @id @default(uuid())
+  customerId            String           @map("customer_id")
+  restaurantId          String           @map("restaurant_id")
+  deliveryAddressId     String           @map("delivery_address_id")
+  paymentType           OrderPaymentType @map("payment_type")
+  paymentMethodId       String?          @map("payment_method_id")
+  paymentData           Json?            @map("payment_data") @db.JsonB
+  status                OrderStatus      @default(PENDING)
   subtotal              Int
-  deliveryFee           Int         @map("delivery_fee")
-  totalAmount           Int         @map("total_amount")
+  deliveryFee           Int              @map("delivery_fee")
+  totalAmount           Int              @map("total_amount")
   notes                 String?
-  estimatedDeliveryTime DateTime?   @map("estimated_delivery_time")
-  acceptedAt            DateTime?   @map("accepted_at")
-  readyAt               DateTime?   @map("ready_at")
-  pickedUpAt            DateTime?   @map("picked_up_at")
-  deliveredAt           DateTime?   @map("delivered_at")
-  cancelledAt           DateTime?   @map("cancelled_at")
-  cancellationReason    String?     @map("cancellation_reason")
-  createdAt             DateTime    @default(now()) @map("created_at")
-  updatedAt             DateTime    @updatedAt @map("updated_at")
+  estimatedDeliveryTime DateTime?        @map("estimated_delivery_time")
+  acceptedAt            DateTime?        @map("accepted_at")
+  readyAt               DateTime?        @map("ready_at")
+  pickedUpAt            DateTime?        @map("picked_up_at")
+  deliveredAt           DateTime?        @map("delivered_at")
+  cancelledAt           DateTime?        @map("cancelled_at")
+  cancellationReason    String?          @map("cancellation_reason")
+  createdAt             DateTime         @default(now()) @map("created_at")
+  updatedAt             DateTime         @updatedAt @map("updated_at")
 
   // Relationships
   customer        User           @relation("CustomerOrders", fields: [customerId], references: [id])
   restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
   deliveryAddress Address        @relation(fields: [deliveryAddressId], references: [id])
-  paymentMethod   PaymentMethod  @relation(fields: [paymentMethodId], references: [id])
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
   orderItems      OrderItem[]
   delivery        Delivery?
   notifications   Notification[]
@@ -203,15 +203,18 @@ model Order {
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  orderId    String   @map("order_id")
-  menuItemId String   @map("menu_item_id")
-  quantity   Int
-  unitPrice  Int      @map("unit_price")
-  totalPrice Int      @map("total_price")
-  notes      String?
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(uuid())
+  orderId            String   @map("order_id")
+  menuItemId         String   @map("menu_item_id")
+  productName        String   @map("product_name")
+  productDescription String?  @map("product_description")
+  productImageUrl    String?  @map("product_image_url")
+  quantity           Int
+  unitPrice          Int      @map("unit_price")
+  totalPrice         Int      @map("total_price")
+  notes              String?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   // Relationships
   order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -223,37 +226,21 @@ model OrderItem {
 model Delivery {
   id               String         @id @default(uuid())
   orderId          String         @unique @map("order_id")
-  deliveryPersonId String         @map("delivery_person_id")
+  deliveryPersonId String?        @map("delivery_person_id")
   status           DeliveryStatus @default(PENDING)
   currentLatitude  Float?         @map("current_latitude") @db.DoublePrecision
   currentLongitude Float?         @map("current_longitude") @db.DoublePrecision
   acceptedAt       DateTime?      @map("accepted_at")
   pickedUpAt       DateTime?      @map("picked_up_at")
   deliveredAt      DateTime?      @map("delivered_at")
-  notes            String?
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
 
   // Relationships
-  order          Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  deliveryPerson DeliveryPerson     @relation(fields: [deliveryPersonId], references: [id])
-  tracking       DeliveryTracking[]
+  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveryPerson DeliveryPerson? @relation(fields: [deliveryPersonId], references: [id])
 
   @@map("deliveries")
-}
-
-model DeliveryTracking {
-  id         String   @id @default(uuid())
-  deliveryId String   @map("delivery_id")
-  latitude   Float    @db.DoublePrecision
-  longitude  Float    @db.DoublePrecision
-  timestamp  DateTime
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  // Relationships
-  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-
-  @@map("delivery_tracking")
 }
 
 model Notification {
@@ -307,11 +294,16 @@ enum DocumentType {
   OTHER
 }
 
+enum DeliveryPersonAvailability {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
 enum VehicleType {
   MOTORCYCLE
   BICYCLE
   CAR
-  WALKING
 }
 
 enum AddressType {
@@ -326,12 +318,17 @@ enum PaymentType {
   DEBIT_CARD
 }
 
+enum OrderPaymentType {
+  STORED_CARD
+  PIX
+  CASH
+}
+
 enum OrderStatus {
   PENDING
   ACCEPTED
   PREPARING
   READY
-  PICKED_UP
   OUT_FOR_DELIVERY
   DELIVERED
   CANCELLED
@@ -340,11 +337,8 @@ enum OrderStatus {
 enum DeliveryStatus {
   PENDING
   ACCEPTED
-  PICKING_UP
   PICKED_UP
-  DELIVERING
   DELIVERED
-  CANCELLED
 }
 
 enum NotificationType {

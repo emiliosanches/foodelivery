@@ -28,5 +28,6 @@ export class CreateMenuItemDto {
 
   @IsInt()
   @Min(1)
-  preparationTimeMin: number;
+  @IsOptional()
+  preparationTimeMin?: number;
 }

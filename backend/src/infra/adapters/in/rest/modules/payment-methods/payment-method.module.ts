@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { PaymentMethodController } from './payment-method.controller';
 import { PaymentMethodServicePort } from '@/application/ports/in/services/payment-method.service.port';
 import { PaymentMethodService } from '@/application/services/payment-method.service';
-import { PaymentMethodRepositoryPort } from '@/application/ports/out/repositories/payment-method.repository.port';
-import { PaymentMethodRepositoryAdapter } from '@/infra/adapters/out/persistence/payment-method.repository.adapter';
 import { PaymentProviderPort } from '@/application/ports/out/payment/payment-provider.port';
 import { StripePaymentProviderAdapter } from '@/infra/adapters/out/payment/stripe-payment-provider.adapter';
 import { PixProviderPort } from '@/application/ports/out/payment/pix-provider.port';
@@ -17,10 +15,6 @@ import { PrismaModule } from '@/infra/adapters/out/persistence/prisma/prisma.mod
     {
       provide: PaymentMethodServicePort,
       useClass: PaymentMethodService,
-    },
-    {
-      provide: PaymentMethodRepositoryPort,
-      useClass: PaymentMethodRepositoryAdapter,
     },
     {
       provide: PaymentProviderPort,
