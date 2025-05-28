@@ -326,7 +326,6 @@ enum OrderPaymentType {
 
 enum OrderStatus {
   PENDING
-  ACCEPTED
   PREPARING
   READY
   OUT_FOR_DELIVERY

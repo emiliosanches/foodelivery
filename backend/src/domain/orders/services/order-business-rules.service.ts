@@ -2,7 +2,6 @@ import { OrderStatus } from '../entities/order.entity';
 
 export class OrderBusinessRules {
   private static readonly RESTAURANT_ALLOWED_STATUSES: OrderStatus[] = [
-    'ACCEPTED',
     'PREPARING',
     'READY',
     'CANCELLED',
@@ -42,8 +41,7 @@ export class OrderBusinessRules {
     currentStatus: OrderStatus,
   ): OrderStatus[] {
     const statusFlow: Record<OrderStatus, OrderStatus[]> = {
-      PENDING: ['ACCEPTED', 'CANCELLED'],
-      ACCEPTED: ['PREPARING', 'CANCELLED'],
+      PENDING: ['PREPARING', 'CANCELLED'],
       PREPARING: ['READY', 'CANCELLED'],
       READY: ['OUT_FOR_DELIVERY'],
       OUT_FOR_DELIVERY: ['DELIVERED'],

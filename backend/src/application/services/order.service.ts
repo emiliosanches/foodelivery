@@ -172,7 +172,7 @@ export class OrderService extends OrderServicePort {
     };
 
     switch (data.newStatus) {
-      case 'ACCEPTED':
+      case 'PREPARING':
         updateData.acceptedAt = new Date();
         updateData.estimatedDeliveryTime =
           OrderBusinessRules.calculateEstimatedDeliveryTime(

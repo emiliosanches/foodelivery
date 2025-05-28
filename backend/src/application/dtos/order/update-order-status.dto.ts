@@ -1,4 +1,4 @@
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@/domain/orders';
 import { Transform } from 'class-transformer';
 import { IsIn, IsString, ValidateIf } from 'class-validator';
 
@@ -6,7 +6,6 @@ export class UpdateOrderStatusDto {
   @IsString({ message: 'newStatus must be a string' })
   @IsIn([
     'PENDING',
-    'ACCEPTED',
     'PREPARING',
     'READY',
     'PICKED_UP',

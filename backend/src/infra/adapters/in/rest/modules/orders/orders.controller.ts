@@ -87,7 +87,7 @@ export class OrderController {
     @Param('orderId') orderId: string,
   ) {
     await this.orderService.updateRestaurantOrderStatus(restaurantId, orderId, {
-      newStatus: 'ACCEPTED',
+      newStatus: 'PREPARING',
     });
   }
 
@@ -102,19 +102,6 @@ export class OrderController {
     await this.orderService.updateRestaurantOrderStatus(restaurantId, orderId, {
       newStatus: 'CANCELLED',
       reason: reason || 'Rejected by restaurant',
-    });
-  }
-
-  // TODO merge preparing and accepted statuses
-  @Patch('restaurants/:restaurantId/orders/:orderId/preparing')
-  @UseGuards(RestaurantOwnerGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async markOrderPreparing(
-    @Param('restaurantId') restaurantId: string,
-    @Param('orderId') orderId: string,
-  ) {
-    await this.orderService.updateRestaurantOrderStatus(restaurantId, orderId, {
-      newStatus: 'PREPARING',
     });
   }
 

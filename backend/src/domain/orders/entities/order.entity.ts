@@ -2,7 +2,6 @@ import { CashPaymentData, PixPaymentData } from '../value-objects';
 
 export type OrderStatus =
   | 'PENDING'
-  | 'ACCEPTED'
   | 'PREPARING'
   | 'READY'
   | 'OUT_FOR_DELIVERY'
