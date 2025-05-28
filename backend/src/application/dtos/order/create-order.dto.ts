@@ -16,13 +16,13 @@ export class CreateOrderItemDto {
   @IsUUID(7, { message: 'menuItemId deve ser um UUID válido' })
   menuItemId: string;
 
-  @IsInt({ message: 'quantity deve ser um número inteiro' })
-  @Min(1, { message: 'quantity deve ser pelo menos 1' })
-  @Max(50, { message: 'quantity não pode ser maior que 50' })
+  @IsInt({ message: 'quantity must be an integer number' })
+  @Min(1, { message: 'quantity must be at least 1' })
+  @Max(50, { message: 'quantity cannot be greater than 50' })
   quantity: number;
 
   @IsOptional()
-  @IsString({ message: 'notes deve ser uma string' })
+  @IsString({ message: 'must be a string' })
   @Transform(({ value }) => value?.trim())
   notes?: string;
 }
@@ -87,9 +87,4 @@ export class CreateOrderDto {
   @IsString({ message: 'notes must be a string' })
   @Transform(({ value }) => value?.trim())
   notes?: string;
-
-  @IsOptional()
-  @IsInt({ message: 'deliveryFee must be an integer number' })
-  @Min(0, { message: 'deliveryFee must be equals to or greater than 0' })
-  deliveryFee?: number;
 }

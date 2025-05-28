@@ -1,4 +1,4 @@
-import { OrderWithRestaurant } from '@/application/dtos/order/order-with-relations.dto';
+import { FullOrderDto, OrderWithPartsDto } from '@/application/dtos/order';
 import { OrderRepositoryPort } from '@/application/ports/out/repositories/order.repository.port';
 import { Order, OrderItem, OrderStatus } from '@/domain/orders';
 import {
@@ -61,12 +61,16 @@ export class OrderRepositoryAdapter extends OrderRepositoryPort {
     return result as Order;
   }
 
-  async findById(orderId: string): Promise<OrderWithRestaurant | null> {
+  async findFullOrderById(orderId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
         restaurant: true,
         orderItems: true,
+        delivery: true,
+        paymentMethod: true,
+        deliveryAddress: true,
+        customer: true,
       },
     });
 
@@ -74,7 +78,24 @@ export class OrderRepositoryAdapter extends OrderRepositoryPort {
       return null;
     }
 
-    return order as OrderWithRestaurant;
+    return order as FullOrderDto;
+  }
+
+  async findByIdWithParts(orderId: string): Promise<OrderWithPartsDto | null> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        restaurant: true,
+        delivery: true,
+        customer: true,
+      },
+    });
+
+    if (!order) {
+      return null;
+    }
+
+    return order as OrderWithPartsDto;
   }
 
   async update(orderId: string, data: Partial<Order>): Promise<Order> {

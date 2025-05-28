@@ -1,6 +1,6 @@
 import { Order } from '@/domain/orders';
-import { CreateOrderDto } from '@/application/dtos/order/create-order.dto';
-import { UpdateOrderStatusDto } from '@/application/dtos/order/update-order-status.dto';
+import { CreateOrderDto } from '@/application/dtos/order';
+import { UpdateOrderStatusDto } from '@/application/dtos/order';
 import { PaginationOutputDto } from '@/shared/utils/pagination.utils';
 
 export abstract class OrderServicePort {
@@ -23,12 +23,16 @@ export abstract class OrderServicePort {
     customerId: string,
     orderId: string,
     reason: string,
-  ): Promise<Order>;
+  ): Promise<void>;
 
   // Restaurant methods
   abstract updateRestaurantOrderStatus(
     restaurantId: string,
     orderId: string,
     data: UpdateOrderStatusDto,
-  ): Promise<Order>;
+  ): Promise<void>;
+  abstract markOrderAsReady(
+    restaurantId: string,
+    orderId: string,
+  ): Promise<void>;
 }

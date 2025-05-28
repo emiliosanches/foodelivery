@@ -42,6 +42,7 @@ model Restaurant {
   description     String?
   phone           String
   email           String   @unique
+  addressId       String   @unique @map("address_id")
   imageUrl        String?  @map("image_url")
   isActive        Boolean  @default(true) @map("is_active")
   deliveryFee     Int      @map("delivery_fee")
@@ -52,7 +53,7 @@ model Restaurant {
 
   // Relationships
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  addresses  Address[]
+  address    Address    @relation(fields: [addressId], references: [id], onDelete: Cascade)
   categories Category[]
   orders     Order[]
 
@@ -84,7 +85,6 @@ model DeliveryPerson {
 model Address {
   id           String      @id @default(uuid())
   userId       String?     @map("user_id")
-  restaurantId String?     @map("restaurant_id")
   street       String
   number       String
   complement   String?
@@ -102,7 +102,7 @@ model Address {
 
   // Relationships
   user       User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  restaurant Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurant Restaurant?
   orders     Order[]
 
   @@map("addresses")
@@ -134,7 +134,7 @@ model MenuItem {
   imageUrl           String?  @map("image_url")
   isActive           Boolean  @default(true) @map("is_active")
   isAvailable        Boolean  @default(true) @map("is_available")
-  preparationTimeMin Int      @map("preparation_time_min")
+  preparationTimeMin Int?     @map("preparation_time_min")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
@@ -226,7 +226,7 @@ model OrderItem {
 model Delivery {
   id               String         @id @default(uuid())
   orderId          String         @unique @map("order_id")
-  deliveryPersonId String         @map("delivery_person_id")
+  deliveryPersonId String?        @map("delivery_person_id")
   status           DeliveryStatus @default(PENDING)
   currentLatitude  Float?         @map("current_latitude") @db.DoublePrecision
   currentLongitude Float?         @map("current_longitude") @db.DoublePrecision
@@ -237,8 +237,8 @@ model Delivery {
   updatedAt        DateTime       @updatedAt @map("updated_at")
 
   // Relationships
-  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  deliveryPerson DeliveryPerson @relation(fields: [deliveryPersonId], references: [id])
+  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveryPerson DeliveryPerson? @relation(fields: [deliveryPersonId], references: [id])
 
   @@map("deliveries")
 }

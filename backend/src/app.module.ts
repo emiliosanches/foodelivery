@@ -7,8 +7,8 @@ import { RestaurantModule } from './infra/adapters/in/rest/modules/restaurants/r
 import { AddressModule } from './infra/adapters/in/rest/modules/address/address.module';
 import { PaymentMethodModule } from './infra/adapters/in/rest/modules/payment-methods/payment-method.module';
 import { OrderModule } from './infra/adapters/in/rest/modules/orders/orders.module';
-import { Delivery } from './domain/delivery';
 import { DeliveryPersonModule } from './infra/adapters/in/rest/modules/delivery-person/delivery-person.module';
+import { DeliveryModule } from './infra/adapters/in/rest/modules/delivery/delivery.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { DeliveryPersonModule } from './infra/adapters/in/rest/modules/delivery-
     AddressModule,
     PaymentMethodModule,
     OrderModule,
-    Delivery,
+    DeliveryModule,
     DeliveryPersonModule,
   ],
 })

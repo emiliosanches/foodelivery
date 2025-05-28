@@ -15,6 +15,8 @@ import { UpdateMenuItemDto } from '@/application/dtos/menu-item/update-menu-item
 import { JwtAuthGuard } from '@/infra/adapters/in/rest/common/guards/jwt-auth.guard';
 import { MenuItem } from '@/domain/entities/menu-item.entity';
 
+// TODO improve these routes
+
 @Controller()
 export class MenuItemController {
   constructor(private readonly menuItemService: MenuItemServicePort) {}

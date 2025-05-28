@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { RestaurantRepositoryPort } from '@/application/ports/out/repositories/restaurant.repository.port';
+import {
+  CreateRestaurantData,
+  RestaurantRepositoryPort,
+} from '@/application/ports/out/repositories/restaurant.repository.port';
 import { Restaurant } from '@/domain/entities/restaurant.entity';
 import { PrismaService } from './prisma/prisma.service';
 
@@ -9,9 +12,22 @@ export class RestaurantRepositoryAdapter extends RestaurantRepositoryPort {
     super();
   }
 
-  async create(restaurant: Restaurant): Promise<Restaurant> {
+  async create({
+    address,
+    userId,
+    ...restaurant
+  }: CreateRestaurantData): Promise<Restaurant> {
     return this.prisma.restaurant.create({
-      data: restaurant,
+      data: {
+        ...restaurant,
+        user: { connect: { id: userId } },
+        address: {
+          create: {
+            ...address,
+            type: 'RESTAURANT',
+          },
+        },
+      },
     });
   }
 
@@ -68,12 +84,10 @@ export class RestaurantRepositoryAdapter extends RestaurantRepositoryPort {
       take,
       where: {
         isActive: true,
-        addresses: {
-          some: {
-            city: {
-              contains: city,
-              mode: 'insensitive',
-            },
+        address: {
+          city: {
+            contains: city,
+            mode: 'insensitive',
           },
         },
       },
@@ -85,12 +99,10 @@ export class RestaurantRepositoryAdapter extends RestaurantRepositoryPort {
     return this.prisma.restaurant.count({
       where: {
         isActive: true,
-        addresses: {
-          some: {
-            city: {
-              contains: city,
-              mode: 'insensitive',
-            },
+        address: {
+          city: {
+            contains: city,
+            mode: 'insensitive',
           },
         },
       },

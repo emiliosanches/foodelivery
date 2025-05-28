@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { OrderRepositoryPort } from '@/application/ports/out/repositories/order.repository.port';
 import { User } from '@/domain/entities/user.entity';
-import { OrderWithRestaurant } from '@/application/dtos/order/order-with-relations.dto';
+import { OrderWithPartsDto } from '@/application/dtos/order';
 
 @Injectable()
 export class OrderAccessGuard implements CanActivate {
@@ -22,7 +22,7 @@ export class OrderAccessGuard implements CanActivate {
 
     if (!user || !orderId) throw new ForbiddenException('Access denied');
 
-    const order = await this.orderRepository.findById(orderId);
+    const order = await this.orderRepository.findByIdWithParts(orderId);
 
     if (!order) throw new NotFoundException('Order not found');
 
@@ -36,15 +36,12 @@ export class OrderAccessGuard implements CanActivate {
     return true;
   }
 
-  private checkOrderAccess(user: User, order: OrderWithRestaurant): boolean {
+  private checkOrderAccess(user: User, order: OrderWithPartsDto): boolean {
     if (order.customerId === user.id) return true;
 
     if (order.restaurant.userId === user.id) return true;
 
-    // TODO: Uncomment when delivery system is implemented
-    // if (order.delivery?.deliveryPersonId === user.id) {
-    //   return true;
-    // }
+    if (order.delivery?.deliveryPersonId === user.id) return true;
 
     return false;
   }

@@ -11,13 +11,12 @@ import {
   DefaultValuePipe,
   HttpStatus,
   HttpCode,
-  Request,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '@/infra/adapters/in/rest/common/guards/jwt-auth.guard';
 import { RestaurantOwnerGuard } from '@/infra/adapters/in/rest/common/guards/restaurant-owner.guard';
 import { OrderAccessGuard } from '@/infra/adapters/in/rest/common/guards/order-access.guard';
 import { OrderServicePort } from '@/application/ports/in/services/order.service.port';
-import { CreateOrderDto } from '@/application/dtos/order/create-order.dto';
+import { CreateOrderDto } from '@/application/dtos/order';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '@/domain/entities/user.entity';
 
@@ -43,8 +42,8 @@ export class OrderController {
 
   @Get('orders/:id')
   @UseGuards(OrderAccessGuard)
-  async getOrder(@Request() req: any) {
-    return req.order;
+  async getOrder(@Param('id') orderId: string) {
+    return this.orderService.findById(orderId);
   }
 
   @Patch('orders/:id/cancel')
@@ -106,6 +105,7 @@ export class OrderController {
     });
   }
 
+  // TODO merge preparing and accepted statuses
   @Patch('restaurants/:restaurantId/orders/:orderId/preparing')
   @UseGuards(RestaurantOwnerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -125,8 +125,6 @@ export class OrderController {
     @Param('restaurantId') restaurantId: string,
     @Param('orderId') orderId: string,
   ) {
-    await this.orderService.updateRestaurantOrderStatus(restaurantId, orderId, {
-      newStatus: 'READY',
-    });
+    await this.orderService.markOrderAsReady(restaurantId, orderId);
   }
 }

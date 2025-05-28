@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { OrderServicePort } from '@/application/ports/in/services/order.service.port';
 import { OrderRepositoryPort } from '@/application/ports/out/repositories/order.repository.port';
-import { CreateOrderDto } from '@/application/dtos/order/create-order.dto';
-import { UpdateOrderStatusDto } from '@/application/dtos/order/update-order-status.dto';
+import { CreateOrderDto } from '@/application/dtos/order';
+import { UpdateOrderStatusDto } from '@/application/dtos/order';
 import {
   Order,
   OrderItem,
@@ -20,20 +20,28 @@ import { OrderItemSnapshot } from '@/shared/utils/order.utils';
 import { v7 } from 'uuid';
 import { PixProviderPort } from '../ports/out/payment/pix-provider.port';
 import { MenuItemRepositoryPort } from '../ports/out/repositories/menu-item.repository.port';
-import { OrderWithRestaurant } from '../dtos/order/order-with-relations.dto';
+import { FullOrderDto } from '../dtos/order';
 import { PaginationOutputDto } from '@/shared/utils/pagination.utils';
+import { DeliveryServicePort } from '../ports/in/services/delivery.service.port';
+import { RestaurantServicePort } from '../ports/in/services/restaurant.service.port';
 
 @Injectable()
 export class OrderService extends OrderServicePort {
   constructor(
     private readonly orderRepository: OrderRepositoryPort,
+    private readonly deliveryService: DeliveryServicePort,
     private readonly menuItemRepository: MenuItemRepositoryPort,
     private readonly pixProviderPort: PixProviderPort,
+    private readonly restaurantService: RestaurantServicePort,
   ) {
     super();
   }
 
   async create(customerId: string, data: CreateOrderDto): Promise<Order> {
+    const restaurant = await this.restaurantService.findById(data.restaurantId);
+
+    if (!restaurant) throw new NotFoundException('Restaurant not found');
+
     const orderItems: Partial<OrderItem>[] = [];
     for (const item of data.items) {
       const menuItem = await this.menuItemRepository.findByIdAndRestaurantId(
@@ -58,13 +66,13 @@ export class OrderService extends OrderServicePort {
     const subtotal = OrderCalculationService.calculateSubtotal(orderItems);
     const totalAmount = OrderCalculationService.calculateTotal(
       subtotal,
-      data.deliveryFee,
+      restaurant.deliveryFee,
     );
 
     if (
       !OrderCalculationService.isTotalCorrect(
         subtotal,
-        data.deliveryFee,
+        restaurant.deliveryFee,
         totalAmount,
       )
     ) {
@@ -89,6 +97,7 @@ export class OrderService extends OrderServicePort {
       paymentData = { changeFor: data.payment.changeFor };
     }
 
+    // TODO new status pending payment
     return await this.orderRepository.createWithItems(
       {
         id: orderId,
@@ -103,7 +112,7 @@ export class OrderService extends OrderServicePort {
         paymentData,
         status: 'PENDING',
         subtotal,
-        deliveryFee: data.deliveryFee,
+        deliveryFee: restaurant.deliveryFee,
         totalAmount,
         notes: data.notes,
         createdAt: new Date(),
@@ -113,8 +122,8 @@ export class OrderService extends OrderServicePort {
     );
   }
 
-  async findById(orderId: string): Promise<OrderWithRestaurant> {
-    const order = await this.orderRepository.findById(orderId);
+  async findById(orderId: string): Promise<FullOrderDto> {
+    const order = await this.orderRepository.findFullOrderById(orderId);
 
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -146,7 +155,7 @@ export class OrderService extends OrderServicePort {
   private async updateStatus(
     orderId: string,
     data: UpdateOrderStatusDto,
-  ): Promise<Order> {
+  ): Promise<void> {
     const order = await this.findById(orderId);
 
     if (
@@ -186,7 +195,7 @@ export class OrderService extends OrderServicePort {
         break;
     }
 
-    return await this.orderRepository.update(orderId, updateData);
+    await this.orderRepository.update(orderId, updateData);
   }
 
   /* =================== CUSTOMER METHODS =================== */
@@ -195,7 +204,7 @@ export class OrderService extends OrderServicePort {
     customerId: string,
     orderId: string,
     reason: string,
-  ): Promise<Order> {
+  ): Promise<void> {
     const order = await this.findById(orderId);
 
     if (order.customerId !== customerId) {
@@ -214,7 +223,7 @@ export class OrderService extends OrderServicePort {
     restaurantId: string,
     orderId: string,
     data: UpdateOrderStatusDto,
-  ): Promise<Order> {
+  ): Promise<void> {
     const order = await this.findById(orderId);
 
     if (order.restaurantId !== restaurantId) {
@@ -228,5 +237,13 @@ export class OrderService extends OrderServicePort {
     }
 
     return this.updateStatus(orderId, data);
+  }
+
+  async markOrderAsReady(restaurantId: string, orderId: string): Promise<void> {
+    await this.updateRestaurantOrderStatus(restaurantId, orderId, {
+      newStatus: 'READY',
+    });
+
+    await this.deliveryService.createDelivery(orderId);
   }
 }

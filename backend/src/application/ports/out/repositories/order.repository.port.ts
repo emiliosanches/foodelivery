@@ -1,10 +1,13 @@
-import { OrderWithRestaurant } from '@/application/dtos/order/order-with-relations.dto';
+import { FullOrderDto, OrderWithPartsDto } from '@/application/dtos/order';
 import { Order, OrderItem, OrderStatus } from '@/domain/orders';
 import { PaginationOutputDto } from '@/shared/utils/pagination.utils';
 
 export abstract class OrderRepositoryPort {
   abstract createWithItems(order: Order, items: OrderItem[]): Promise<Order>;
-  abstract findById(orderId: string): Promise<OrderWithRestaurant | null>;
+  abstract findFullOrderById(orderId: string): Promise<FullOrderDto | null>;
+  abstract findByIdWithParts(
+    orderId: string,
+  ): Promise<OrderWithPartsDto | null>;
   abstract update(orderId: string, data: Partial<Order>): Promise<Order>;
   abstract findByCustomerId(
     customerId: string,

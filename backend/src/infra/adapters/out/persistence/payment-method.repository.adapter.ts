@@ -61,7 +61,6 @@ export class PaymentMethodRepositoryAdapter
         updatedAt: new Date(),
       },
     });
-
   }
 
   async delete(id: string): Promise<void> {

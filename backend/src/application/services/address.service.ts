@@ -19,7 +19,6 @@ export class AddressService extends AddressServicePort {
     return await this.addressRepository.create({
       id: v7(),
       userId,
-      restaurantId: undefined,
       street: data.street,
       number: data.number,
       complement: data.complement,
@@ -27,7 +26,7 @@ export class AddressService extends AddressServicePort {
       city: data.city,
       state: data.state,
       postalCode: data.postalCode.replace(/\D/g, ''),
-      country: data.country || 'BR',
+      country: data.country,
       latitude: data.latitude,
       longitude: data.longitude,
       isDefault: isFirstAddress,

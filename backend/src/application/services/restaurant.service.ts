@@ -54,6 +54,7 @@ export class RestaurantService extends RestaurantServicePort {
       deliveryTimeMax: restaurantData.deliveryTimeMax,
       createdAt: new Date(),
       updatedAt: new Date(),
+      address: restaurantData.address,
     });
   }
 

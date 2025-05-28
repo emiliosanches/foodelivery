@@ -74,12 +74,10 @@ export class MenuItemService extends MenuItemServicePort {
       throw new NotFoundException('Menu item not found');
     }
 
-    // Validar preço se fornecido
     if (menuItemData.price !== undefined && menuItemData.price <= 0) {
       throw new BadRequestException('Price must be greater than zero');
     }
 
-    // Validar tempo de preparo se fornecido
     if (
       menuItemData.preparationTimeMin !== undefined &&
       menuItemData.preparationTimeMin <= 0
@@ -89,7 +87,6 @@ export class MenuItemService extends MenuItemServicePort {
       );
     }
 
-    // Verificar se o nome está sendo alterado e se já existe
     if (menuItemData.name && menuItemData.name !== menuItem.name) {
       const existingMenuItem = await this.menuItemRepository.findByName(
         menuItem.categoryId,
