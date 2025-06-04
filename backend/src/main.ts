@@ -14,9 +14,10 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: process.env.NODE_ENV === 'development' ? '*' : process.env.FRONTEND_URL
+    origin:
+      process.env.NODE_ENV === 'development' ? '*' : process.env.FRONTEND_URL,
   });
 
-  await app.listen(3000);
+  await app.listen(Number(process.env.PORT) || 3000);
 }
 bootstrap();

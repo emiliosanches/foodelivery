@@ -47,6 +47,7 @@ export class OrderController {
   }
 
   @Patch('orders/:id/cancel')
+  @UseGuards(OrderAccessGuard)
   @HttpCode(HttpStatus.OK)
   async cancelOrder(
     @CurrentUser() user: User,
