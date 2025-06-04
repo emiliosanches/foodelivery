@@ -13,7 +13,9 @@ async function bootstrap() {
     }),
   );
 
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.NODE_ENV === 'development' ? '*' : process.env.FRONTEND_URL
+  });
 
   await app.listen(3000);
 }

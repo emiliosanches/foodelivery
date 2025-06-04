@@ -47,6 +47,7 @@ export class DeliveryPersonDeliveriesController {
     await this.deliveryService.acceptDelivery(deliveryId, deliveryPerson.id);
   }
 
+  // TODO remove this, sync with delivery person's location using events
   @Put(':deliveryId/location')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateDeliveryLocation(
