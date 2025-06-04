@@ -37,7 +37,7 @@ export class OrderController {
       customerId: user.id,
     };
 
-    return this.orderService.create(user.id, orderData);
+    return this.orderService.create(user, orderData);
   }
 
   @Get('orders/:id')

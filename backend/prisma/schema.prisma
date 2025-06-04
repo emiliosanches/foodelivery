@@ -248,8 +248,8 @@ model Notification {
   userId    String           @map("user_id")
   orderId   String?          @map("order_id")
   type      NotificationType
-  title     String
-  message   String
+  title     String?
+  message   String?
   isRead    Boolean          @default(false) @map("is_read")
   metadata  String?          @db.Text
   createdAt DateTime         @default(now()) @map("created_at")
@@ -343,9 +343,7 @@ enum DeliveryStatus {
 enum NotificationType {
   ORDER_CREATED
   ORDER_ACCEPTED
-  ORDER_REJECTED
   ORDER_READY
-  ORDER_PICKED_UP
   ORDER_OUT_FOR_DELIVERY
   ORDER_DELIVERED
   ORDER_CANCELLED

@@ -15,7 +15,10 @@ export class OrderRepositoryAdapter extends OrderRepositoryPort {
     super();
   }
 
-  async createWithItems(order: Order, items: OrderItem[]): Promise<Order> {
+  async createWithItems(
+    order: Order,
+    items: OrderItem[],
+  ): Promise<FullOrderDto> {
     const result = await this.prisma.$transaction(async (tx) => {
       const createdOrder = await tx.order.create({
         data: {
@@ -35,30 +38,37 @@ export class OrderRepositoryAdapter extends OrderRepositoryPort {
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,
         },
+        include: {
+          customer: true,
+          restaurant: true,
+          deliveryAddress: true,
+          paymentMethod: true,
+        },
       });
 
-      // Criar os itens do pedido
+      const orderItems = items.map((item) => ({
+        id: item.id,
+        orderId: order.id,
+        menuItemId: item.menuItemId,
+        productName: item.productName,
+        productDescription: item.productDescription,
+        productImageUrl: item.productImageUrl,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.totalPrice,
+        notes: item.notes,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      }))
+
       await tx.orderItem.createMany({
-        data: items.map((item) => ({
-          id: item.id,
-          orderId: order.id,
-          menuItemId: item.menuItemId,
-          productName: item.productName,
-          productDescription: item.productDescription,
-          productImageUrl: item.productImageUrl,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          totalPrice: item.totalPrice,
-          notes: item.notes,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-        })),
+        data: orderItems,
       });
 
-      return createdOrder;
+      return { ...createdOrder, orderItems: orderItems, delivery: null };
     });
 
-    return result as Order;
+    return result as FullOrderDto;
   }
 
   async findFullOrderById(orderId: string) {

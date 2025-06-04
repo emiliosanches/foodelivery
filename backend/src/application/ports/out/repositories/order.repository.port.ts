@@ -3,7 +3,7 @@ import { Order, OrderItem, OrderStatus } from '@/domain/orders';
 import { PaginationOutputDto } from '@/shared/utils/pagination.utils';
 
 export abstract class OrderRepositoryPort {
-  abstract createWithItems(order: Order, items: OrderItem[]): Promise<Order>;
+  abstract createWithItems(order: Order, items: OrderItem[]): Promise<FullOrderDto>;
   abstract findFullOrderById(orderId: string): Promise<FullOrderDto | null>;
   abstract findByIdWithParts(
     orderId: string,
