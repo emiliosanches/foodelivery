@@ -21,6 +21,8 @@ import { DeliveryPersonRepositoryPort } from '@/application/ports/out/repositori
 import { DeliveryPersonRepositoryAdapter } from '../delivery-person.repository.adapter';
 import { DeliveryRepositoryPort } from '@/application/ports/out/repositories/delivery.repository.port';
 import { DeliveryRepositoryAdapter } from '../delivery.repository.adapter';
+import { NotificationRepositoryPort } from '@/application/ports/out/repositories/notification.repository.port';
+import { NotificationRepositoryAdapter } from '../notification.repository.adapter';
 
 @Module({
   providers: [
@@ -49,6 +51,10 @@ import { DeliveryRepositoryAdapter } from '../delivery.repository.adapter';
       provide: DeliveryRepositoryPort,
       useClass: DeliveryRepositoryAdapter,
     },
+    {
+      provide: NotificationRepositoryPort,
+      useClass: NotificationRepositoryAdapter,
+    },
   ],
   exports: [
     PrismaService,
@@ -61,6 +67,7 @@ import { DeliveryRepositoryAdapter } from '../delivery.repository.adapter';
     OrderRepositoryPort,
     DeliveryPersonRepositoryPort,
     DeliveryRepositoryPort,
+    NotificationRepositoryPort,
   ],
 })
 export class PrismaModule {}

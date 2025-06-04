@@ -2,10 +2,11 @@ import { Order } from '@/domain/orders';
 import { CreateOrderDto } from '@/application/dtos/order';
 import { UpdateOrderStatusDto } from '@/application/dtos/order';
 import { PaginationOutputDto } from '@/shared/utils/pagination.utils';
+import { User } from '@/domain/entities/user.entity';
 
 export abstract class OrderServicePort {
   // Core methods
-  abstract create(customerId: string, data: CreateOrderDto): Promise<Order>;
+  abstract create(customerId: User, data: CreateOrderDto): Promise<Order>;
   abstract findById(orderId: string): Promise<Order>;
   abstract findByCustomer(
     customerId: string,

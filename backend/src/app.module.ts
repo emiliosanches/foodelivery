@@ -9,9 +9,15 @@ import { PaymentMethodModule } from './infra/adapters/in/rest/modules/payment-me
 import { OrderModule } from './infra/adapters/in/rest/modules/orders/orders.module';
 import { DeliveryPersonModule } from './infra/adapters/in/rest/modules/delivery-person/delivery-person.module';
 import { DeliveryModule } from './infra/adapters/in/rest/modules/delivery/delivery.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { NotificationsModule } from './infra/adapters/in/rest/modules/notifications/notifications.module';
+import { EventsModule } from './infra/adapters/out/events/events.module';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot({
+      wildcard: true,
+    }),
     AppConfigModule,
     PrismaModule,
     AuthModule,
@@ -22,6 +28,8 @@ import { DeliveryModule } from './infra/adapters/in/rest/modules/delivery/delive
     OrderModule,
     DeliveryModule,
     DeliveryPersonModule,
+    NotificationsModule,
+    EventsModule,
   ],
 })
 export class AppModule {}

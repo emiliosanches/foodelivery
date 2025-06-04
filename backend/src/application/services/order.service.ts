@@ -24,6 +24,8 @@ import { FullOrderDto } from '../dtos/order';
 import { PaginationOutputDto } from '@/shared/utils/pagination.utils';
 import { DeliveryServicePort } from '../ports/in/services/delivery.service.port';
 import { RestaurantServicePort } from '../ports/in/services/restaurant.service.port';
+import { OrdersEventBusPort } from '../ports/out/event-bus';
+import { User } from '@/domain/entities/user.entity';
 
 @Injectable()
 export class OrderService extends OrderServicePort {
@@ -33,11 +35,12 @@ export class OrderService extends OrderServicePort {
     private readonly menuItemRepository: MenuItemRepositoryPort,
     private readonly pixProviderPort: PixProviderPort,
     private readonly restaurantService: RestaurantServicePort,
+    private readonly eventEmitter: OrdersEventBusPort,
   ) {
     super();
   }
 
-  async create(customerId: string, data: CreateOrderDto): Promise<Order> {
+  async create(customer: User, data: CreateOrderDto): Promise<Order> {
     const restaurant = await this.restaurantService.findById(data.restaurantId);
 
     if (!restaurant) throw new NotFoundException('Restaurant not found');
@@ -98,10 +101,10 @@ export class OrderService extends OrderServicePort {
     }
 
     // TODO new status pending payment
-    return await this.orderRepository.createWithItems(
+    const result = await this.orderRepository.createWithItems(
       {
         id: orderId,
-        customerId,
+        customerId: customer.id,
         restaurantId: data.restaurantId,
         deliveryAddressId: data.deliveryAddressId,
         paymentType: data.payment.type,
@@ -120,6 +123,22 @@ export class OrderService extends OrderServicePort {
       },
       orderItems as OrderItem[],
     );
+
+    const {
+      customer: resultCustomer,
+      orderItems: resultOrderItems,
+      restaurant: resultRestaurant,
+      ...resultOrder
+    } = result;
+
+    await this.eventEmitter.emitOrderCreated({
+      customer: resultCustomer,
+      order: resultOrder,
+      items: resultOrderItems,
+      restaurant: resultRestaurant,
+    });
+
+    return result;
   }
 
   async findById(orderId: string): Promise<FullOrderDto> {
@@ -196,9 +215,12 @@ export class OrderService extends OrderServicePort {
     }
 
     await this.orderRepository.update(orderId, updateData);
-  }
 
-  /* =================== CUSTOMER METHODS =================== */
+    await this.eventEmitter.emitOrderStatusUpdated({
+      order,
+      newStatus: data.newStatus,
+    });
+  }
 
   async cancelCustomerOrder(
     customerId: string,
@@ -216,8 +238,6 @@ export class OrderService extends OrderServicePort {
       reason: reason || 'Cancelled by customer',
     });
   }
-
-  /* =================== RESTAURANT METHODS =================== */
 
   async updateRestaurantOrderStatus(
     restaurantId: string,
