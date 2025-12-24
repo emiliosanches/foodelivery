@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: mini-food-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mini-food-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for WebSocket scaling
+  redis:
+    image: redis:7-alpine
+    container_name: mini-food-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mini-food-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Instance 1 (Port 2998)
+  backend-1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mini-food-backend-1
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      JWT_SECRET: "seu-segredo-super-seguro"
+      JWT_EXPIRES_IN: "7d"
+      FRONTEND_URL: "http://localhost:3000"
+      PORT: 3000
+    ports:
+      - "2998:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mini-food-network
+    command: sh -c "npx prisma migrate deploy && node dist/main"
+
+  # Backend Instance 2 (Port 2999)
+  backend-2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mini-food-backend-2
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      JWT_SECRET: "seu-segredo-super-seguro"
+      JWT_EXPIRES_IN: "7d"
+      FRONTEND_URL: "http://localhost:3000"
+      PORT: 3000
+    ports:
+      - "2999:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mini-food-network
+    command: sh -c "npx prisma migrate deploy && node dist/main"
+
+  # Nginx Load Balancer (Port 3000)
+  nginx:
+    image: nginx:alpine
+    container_name: mini-food-nginx
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend-1
+      - backend-2
+    networks:
+      - mini-food-network
+
+networks:
+  mini-food-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
