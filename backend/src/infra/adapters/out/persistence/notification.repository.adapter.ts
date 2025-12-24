@@ -47,6 +47,19 @@ export class NotificationRepositoryAdapter extends NotificationRepositoryPort {
     });
   }
 
+  async findById(id: string): Promise<Notification | null> {
+    return this.prisma.notification.findUnique({
+      where: { id },
+    });
+  }
+
+  async markAsRead(id: string): Promise<Notification> {
+    return this.prisma.notification.update({
+      where: { id },
+      data: { isRead: true, updatedAt: new Date() },
+    });
+  }
+
   async markAllAsRead(userId: string): Promise<void> {
     await this.prisma.notification.updateMany({
       where: { userId },
