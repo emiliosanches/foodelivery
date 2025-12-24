@@ -1,17 +1,14 @@
-# Docker Production Environment
+# 🐳 Docker Production Environment
 
-Complete guide for running the application with horizontal scaling using Docker Compose.
+Production-ready stack with horizontal scaling, load balancing, and WebSocket synchronization.
 
 ## 🎯 What's Included
 
-This Docker Compose stack provides a **production-ready environment** with:
-
-- 🔀 **Load Balancer** - Nginx distributing traffic between instances
-- 🚀 **Horizontal Scaling** - 2 backend instances for high availability
-- 📡 **WebSocket Sync** - Redis ensuring real-time events reach all clients
-- 🗄️ **Database** - PostgreSQL with persistent storage
-- ⚡ **Caching** - Redis for WebSocket pub/sub
-- 🐳 **Optimized Images** - Multi-stage builds for minimal size
+- **🔀 Nginx Load Balancer** - Distributes traffic using least connections algorithm
+- **🚀 2x Backend Instances** - Horizontal scaling with auto-migrations
+- **⚡ Redis** - WebSocket pub/sub for real-time event synchronization
+- **🗄️ PostgreSQL** - Database with persistent volumes
+- **📦 Multi-stage Builds** - Optimized Docker images (~150MB)
 
 ## 🏗️ Architecture
 
@@ -51,77 +48,40 @@ This Docker Compose stack provides a **production-ready environment** with:
 
 ## 🚀 Quick Start
 
-### Iniciar todos os serviços
-
 ```bash
-docker-compose up --build
+# Start all services
+docker compose up --build
+
+# Run in background
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
+
+# Stop everything
+docker compose down
+
+# Stop and remove volumes (cleans database)
+docker compose down -v
 ```
 
-### Iniciar em background
+**Access:**
 
-```bash
-docker-compose up -d --build
-```
+- 🌐 Load Balancer: http://localhost:3000
+- 🚀 Backend 1: http://localhost:2998
+- 🚀 Backend 2: http://localhost:2999
+- 🗄️ PostgreSQL: localhost:5432
+- ⚡ Redis: localhost:6379
 
-### Ver logs
+## 🔧 Services Overview
 
-```bash
-# Todos os serviços
-docker-compose logs -f
-
-# Serviço específico
-docker-compose logs -f backend-1
-docker-compose logs -f backend-2
-docker-compose logs -f nginx
-```
-
-### Parar serviços
-
-```bash
-docker-compose down
-```
-
-### Parar e remover volumes (limpa banco de dados)
-
-```bash
-docker-compose down -v
-```
-
-## 🔧 Serviços
-
-### Nginx Load Balancer
-
-- **Porta**: 3000
-- **Algoritmo**: Least connections
-- **WebSocket**: Suportado via `/socket.io/`
-- **Rate Limit**: 100 req/s com burst de 20
-
-### Backend Instance 1
-
-- **Porta Externa**: 2998
-- **Porta Interna**: 3000
-- **Redis**: Habilitado
-- **Auto Migration**: Sim
-
-### Backend Instance 2
-
-- **Porta Externa**: 2999
-- **Porta Interna**: 3000
-- **Redis**: Habilitado
-- **Auto Migration**: Sim
-
-### PostgreSQL
-
-- **Porta**: 5432
-- **Usuário**: postgres
-- **Senha**: postgres
-- **Database**: postgres
-- **Volume**: Persistente
-
-### Redis
-
-- **Porta**: 6379
-- **Uso**: Sincronização de WebSocket entre instâncias
+| Service       | Port | Description                                          |
+| ------------- | ---- | ---------------------------------------------------- |
+| **nginx**     | 3000 | Load balancer (least connections), WebSocket support |
+| **backend-1** | 2998 | NestJS instance with Redis adapter                   |
+| **backend-2** | 2999 | NestJS instance with Redis adapter                   |
+| **postgres**  | 5432 | PostgreSQL 15 with persistent volume                 |
+| **redis**     | 6379 | Pub/sub broker for WebSocket sync                    |
 
 ## 🧪 Testing Scalability
 
@@ -151,127 +111,83 @@ curl -X POST http://localhost:3000/auth/register \
 
 ### 1. Test Load Balancer
 
-```bash
+````bash
 # Make multiple requests - they'll be distributed across instances
-for i in {1..10}; do
-  curl http://localhost:3000/health
-done
-```
+1. Start Docker Compose: `docker compose up --build`
+2. Open [backend/test/websocket-test.html](backend/test/websocket-test.html) in browser
+3. Get JWT token:
+   ```bash
+   curl -X POST http://localhost:3000/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "test@test.com",
+       "password": "test123",
+       "name": "Test User",
+       "role": "CUSTOMER",
+       "phone": "+5511999999999"
+     }'
+````
 
-### 2. Manual WebSocket Test
+4. Paste token in test interface
+5. Click "Connect All Clients" (creates 3 WebSocket connections)
+6. Click "Send Test Event"
+7. **✅ All 3 clients receive it = Redis is synchronizing!**
 
-```javascript
-// Client 1 (may connect to backend-1)
-const socket1 = io("http://localhost:3000/events", {
-  auth: { token: "JWT_TOKEN" },
-});
+### Manual Testing
 
-// Client 2 (may connect to backend-2)
-const socket2 = io("http://localhost:3000/events", {
-  auth: { token: "JWT_TOKEN" },
-});
+````bash
+# Test load distribution
+for i in {1..10}; do curl http://localhost:3000/health; done
 
-// Both should receive events regardless of instance
-socket1.on("test-event", (data) => console.log("Client 1:", data));
-socket2.on("test-event", (data) => console.log("Client 2:", data));
-
-// Send from client 1 - both should receive
-socket1.emit("test-event", { message: "Hello from client 1!" });
-```
-
-### 3. Verify Load Distribution
-
-```bash
-# View logs from both instances simultaneously
-docker compose logs -f backend-1 backend-2 | grep "connected as user"
-```
-
-## 📊 Monitoramento
-
-### Ver status dos containers
-
-```bash
-docker-compose ps
-```
-
-### Ver uso de recursos
-
-```bash
-docker stats
-```
-
-### Acessar logs do Nginx
-
-```bash
-docker exec -it mini-food-nginx cat /var/log/nginx/access.log
-docker exec -it mini-food-nginx cat /var/log/nginx/error.log
-```
-
-## 🛠️ Troubleshooting
-
-### Backend não conecta ao Redis
+# View which instance handles each connection
+docker compose logs -f backend-1 backend-2 | grep "New client connected
 
 Verifique se o Redis está healthy:
 
 ```bash
 docker-compose ps redis
-```
+````
 
-Teste a conexão:
+�️ Troubleshooting
+
+### Backend won't connect to Redis
 
 ```bash
-docker exec -it mini-food-redis redis-cli ping
-# Deve retornar: PONG
+docker compose ps redis  # Check if healthy
+docker exec -it mini-food-redis redis-cli ping  # Should return PONG
 ```
 
-### Migrations não executam
-
-Execute manualmente:
+### Migrations not running
 
 ```bash
 docker exec -it mini-food-backend-1 npx prisma migrate deploy
 ```
 
-### WebSocket não sincroniza entre instâncias
-
-Verifique os logs para confirmar que ambas instâncias conectaram ao Redis:
+### WebSocket not syncing
 
 ```bash
-docker-compose logs backend-1 backend-2 | grep "Redis adapter configured"
+# Check if both instances connected to Redis
+docker compose logs backend-1 backend-2 | grep "Redis adapter configured"
 ```
 
-### Port já em uso
+### Port already in use
 
-Se a porta 3000, 2998 ou 2999 já estiver em uso, edite o `docker-compose.yml` para usar outras portas.
+Edit `docker-compose.yml` to use different ports.
 
-## 🔄 Rebuild de uma instância específica
-
-```bash
-# Rebuild backend-1
-docker-compose up -d --build --no-deps backend-1
-
-# Rebuild backend-2
-docker-compose up -d --build --no-deps backend-2
-```
-
-## 🧹 Limpeza
-
-### Remover tudo (containers, volumes, networks)
+## 🧹 Cleanup
 
 ```bash
-docker-compose down -v --remove-orphans
-```
+# Remove everything (containers, volumes, networks)
+docker compose down -v --remove-orphans
 
-### Remover imagens antigas
-
-```bash
+# Remove old images
 docker image prune -a
 ```
 
-## 📝 Notas
+## 📝 Production Notes
 
-- As migrations são executadas automaticamente na inicialização de cada backend
-- O Redis garante que eventos WebSocket sejam entregues em todas as instâncias
-- O Nginx distribui as requisições usando least connections (menor número de conexões ativas)
-- Os volumes do PostgreSQL são persistentes entre reinicializações
-- Para produção, altere `JWT_SECRET` e as credenciais do banco
+- Migrations run automatically on backend startup
+- Redis ensures WebSocket events reach all instances
+- Nginx uses least connections for optimal distribution
+- PostgreSQL volumes persist between restarts
+- **Change JWT_SECRET and database credentials for production!**

@@ -1,16 +1,11 @@
-# 🏗️ FooDelivery Backend - REST API
+# ⚙️ FooDelivery Backend
 
-> **Robust and scalable RESTful API built with NestJS, TypeScript, and Hexagonal Architecture**
+> RESTful API with Hexagonal Architecture, WebSocket support, and production-ready infrastructure
 
-![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
-
-## 🎯 About the Project
-
-This API is the heart of **FooDelivery**, a modern delivery platform that manages **restaurants**, **orders**, **deliveries**, and **users**. Built with focus on **performance**, **security**, and **maintainability**.
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=flat-square&logo=Prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)
 
 ### 🏛️ Hexagonal Architecture (Clean Architecture)
 
@@ -46,36 +41,13 @@ This API is the heart of **FooDelivery**, a modern delivery platform that manage
 - **🧪 Jest** - Complete testing framework
 - **📊 Class Validator** - Declarative data validation
 
-## 🌟 Implemented Features
+## � Core Features
 
-### 👥 User Management
-
-- ✅ **JWT Authentication** with refresh tokens
-- ✅ **Multi-profiles** (Customer, Restaurant, Driver)
-- ✅ **Robust validation** of input data
-- ✅ **Password encryption** with bcrypt
-
-### 🏪 Restaurant Module
-
-- ✅ **Complete CRUD** for restaurants
-- ✅ **Category management** organized
-- ✅ **Dynamic menu** with items and prices
-- ✅ **Activation/deactivation system**
-- ✅ **Location-based search** (city)
-
-### 📦 Order System
-
-- ✅ **Complete order flow**
-- ✅ **Multiple status** tracking
-- ✅ **Automatic calculations** of values
-- ✅ **Detailed history** of transactions
-
-### 🚚 Smart Deliveries
-
-- ✅ **Real-time tracking**
-- ✅ **Driver management**
-- ✅ **Route optimization**
-- ✅ **Rating system**
+- **User Management:** JWT auth, multi-role support (Customer/Restaurant/Driver), refresh tokens
+- **Restaurant Operations:** CRUD, menu management, categories, location-based search
+- **Order Flow:** Complete lifecycle from creation to delivery, status tracking, real-time updates
+- **Delivery System:** Driver management, assignment logic, location tracking
+- **Real-Time Events:** WebSocket notifications for orders, deliveries, and system events
 
 ## 🚀 How to Run
 
@@ -275,66 +247,30 @@ POST /users/me/delivery-profile/deliveries/:deliveryId/pickup  # Mark a delivery
 POST /users/me/delivery-profile/deliveries/:deliveryId/deliver # Mark a delivery as delivered (auth, delivery person)
 ```
 
-## 🧪 Tests (In Development)
+## 🏗️ Architecture Patterns
 
-```bash
-# Tests will be implemented soon
-# - Unit tests with Jest
-# - Integration tests
-# - Complete code coverage
-```
+- **Ports & Adapters (Hexagonal):** Domain logic independent of infrastructure
+- **Repository Pattern:** Data access abstraction
+- **Dependency Injection:** NestJS IoC container
+- **Event-Driven:** Domain events for cross-module communication
 
-## 🏗️ Code Patterns
+## 🔒 Security
 
-### 📐 Architecture
+- JWT authentication with refresh tokens
+- Password hashing with bcrypt
+- Input validation with class-validator
+- Custom NestJS Guards for route protection
+- CORS configured for frontend origin
 
-- **🎯 Ports & Adapters** - Dependency inversion
-- **🧩 Dependency Injection** - NestJS IoC container
-- **📦 Repository Pattern** - Persistence abstraction
-- **🎭 Service Layer** - Isolated business logic
+## 📊 Performance
 
-## 🔒 Implemented Security
+- Database indexes on foreign keys and search fields
+- Pagination on list endpoints
+- Prisma query optimization
+- Redis for WebSocket scaling (optional)
 
-- 🛡️ **Rigorous validation** of input with class-validator
-- 🔐 **JWT Authentication** with custom guards
-- 🧹 **Data sanitization** of input
-- 🔑 **Secure hashing** of passwords with bcrypt
-- 🚫 **CORS** properly configured
+## 🧪 Testing WebSocket Scaling
 
-## 📊 Performance & Monitoring
+Open [test/websocket-test.html](test/websocket-test.html) in a browser after running Docker Compose. Connect 3 clients and send an event - all should receive it, proving Redis synchronization works.
 
-- ⚡ **Optimized queries** with Prisma
-- 🔍 **Strategic database indexes**
-- 📈 **Pagination** in listing endpoints
-- 🕒 **Timeout** configured in operations
-- 📝 **Structured logging** for debugging
-
-## 🚀 Deploy & DevOps
-
-```bash
-# Build for production
-npm run build
-
-# Run in production
-npm run start:prod
-
-# Docker
-docker build -t delivery-api .
-docker run -p 3000:3000 delivery-api
-```
-
-## 🎯 Next Steps
-
-- [ ] 🧪 **Unit Tests** - Complete coverage with Jest
-- [ ] 🧪 **E2E Tests** - End-to-end integration tests
-- [ ] 📚 **Swagger Documentation** - Interactive API docs
-- [ ] 📊 **In-App Payment** - Stripe API (Sandbox) to simulate payments
-- [ ] 🐳 **Kubernetes** - Container orchestration
-- [ ] 🚀 **CI/CD** - Automated pipeline
-
----
-
-<div align="center">
-  <p><strong>🚀 REST API ready to scale</strong></p>
-  <p><em>Developed with market best practices</em></p>
-</div>
+See [WEBSOCKET-SCALING.md](WEBSOCKET-SCALING.md) for technical details.

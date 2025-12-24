@@ -1,149 +1,231 @@
-# 🍕 FooDelivery - Complete Food Delivery Platform
+# 🍕 FooDelivery - Food Delivery Platform
 
-> **A modern and scalable food delivery solution built with development best practices**
+> Modern full-stack delivery platform built with NestJS, React, and enterprise-grade architecture
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
 
-## 🚀 Overview
+**Portfolio project demonstrating modern software engineering practices:** Clean Architecture, horizontal scaling, real-time WebSockets, Docker containerization, and production-ready infrastructure.
 
-**FooDelivery** is a complete delivery platform that connects **restaurants**, **drivers**, and **customers** in a robust and efficient digital ecosystem. Developed with focus on **performance**, **scalability**, and **user experience**.
+## 🎯 What This Project Demonstrates
 
-### ✨ Key Features
+### **Architecture & Design Patterns**
 
-- 🏪 **Complete Restaurant Management** - Menus, categories, and orders
-- 🚚 **Smart Delivery System** - Real-time tracking
-- 👥 **Multi-user Profiles** - Customers, restaurants, and drivers
-- 💳 **Payment Processing** - Multiple secure payment methods
-- 📱 **Responsive Interface** - Optimized experience across all devices
-- 🔔 **Real-time Notifications** - Instant status updates
-- 📊 **Analytics Dashboard** - Detailed reports and metrics
+- ✅ **Hexagonal Architecture** (Ports & Adapters)
+- ✅ **Clean Code** with SOLID principles
+- ✅ **Domain-Driven Design** with clear bounded contexts
+- ✅ **Repository Pattern** for data abstraction
 
-## 🏗️ Project Architecture
+### **Scalability & Performance**
+
+- ✅ **Horizontal Scaling** with load balancer (Nginx)
+- ✅ **WebSocket Scaling** via Redis pub/sub
+- ✅ **Multi-instance deployment** with Docker Compose
+- ✅ **Database optimization** with indexes and efficient queries
+
+### **Real-Time Features**
+
+- ✅ **WebSocket integration** (Socket.io)
+- ✅ **Live order tracking** and notifications
+- ✅ **Event-driven architecture**
+
+### **DevOps & Infrastructure**
+
+- ✅ **Docker containerization** with multi-stage builds
+- ✅ **Production-ready stack** (Nginx + Backend + Redis + PostgreSQL)
+- ✅ **Database migrations** with Prisma
+- ✅ **Environment configuration** management
+
+## 🏗️ Tech Stack
+
+### Backend (NestJS)
+
+- **Framework:** NestJS 10 with TypeScript
+- **Architecture:** Hexagonal (Clean Architecture)
+- **Database:** PostgreSQL 15 + Prisma ORM
+- **Auth:** JWT with refresh tokens
+- **Real-time:** Socket.io with Redis adapter
+- **Validation:** class-validator, class-transformer
+
+### Frontend (React)
+
+- **Framework:** Next.js 14 with TypeScript
+- **Styling:** Tailwind CSS
+- **State:** React Context API
+- **HTTP Client:** Fetch API
+- **WebSocket:** Socket.io client
+
+### Infrastructure
+
+- **Containerization:** Docker + Docker Compose
+- **Load Balancer:** Nginx (least connections)
+- **Caching/Pub-Sub:** Redis 7
+- **Database:** PostgreSQL 15
+
+## 📁 Project Structure
 
 ```
-FooDelivery/
-├── 🎨 frontend/          # Modern and responsive React interface
-└── ⚙️  backend/           # Robust API with NestJS and hexagonal architecture
+mini-food/
+├── backend/           # NestJS API with Hexagonal Architecture
+│   ├── src/
+│   │   ├── domain/          # Business logic & entities
+│   │   ├── application/     # Use cases & DTOs
+│   │   └── infra/           # Adapters (REST, Database, WebSocket)
+│   ├── prisma/              # Database schema & migrations
+│   └── test/                # E2E tests & WebSocket test tool
+├── frontend/          # Next.js React application
+├── docker-compose.yml # Full production stack
+└── nginx.conf         # Load balancer configuration
 ```
 
-### 🎯 Backend - Enterprise RESTful API
+### Hexagonal Architecture Visualization
 
-- **🏛️ Hexagonal Architecture** - Clean, testable, and maintainable code
-- **🔐 JWT Authentication** - Robust and stateless security
-- **📊 Prisma ORM** - Type-safe database access
-- **🗄️ PostgreSQL** - High-performance relational database
-- **📝 TypeScript** - Type safety and better DX
-- **🧪 Automated Testing** - Complete test coverage
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         DOMAIN LAYER                        │
+│  (Pure Business Logic - Framework Independent)              │
+│                                                              │
+│  • Entities (User, Restaurant, Order, Delivery)             │
+│  • Domain Services (Business Rules)                         │
+│  • Value Objects (Address, Money, Status)                   │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────┴──────────────────────────────────────┐
+│                    APPLICATION LAYER                        │
+│  (Use Cases & Application Logic)                            │
+│                                                              │
+│  • Services (OrderService, DeliveryService)                 │
+│  • DTOs (CreateOrderDto, UpdateRestaurantDto)               │
+│  • Ports (IOrderRepository, IPaymentGateway)                │
+└─────────┬────────────────────────────────────┬──────────────┘
+          │                                    │
+┌─────────┴────────────────┐      ┌───────────┴──────────────┐
+│   INBOUND ADAPTERS       │      │   OUTBOUND ADAPTERS      │
+│  (Driven - Input)        │      │  (Driving - Output)      │
+│                          │      │                          │
+│  • REST Controllers      │      │  • Prisma Repositories   │
+│  • WebSocket Gateway     │      │  • Redis Adapter         │
+│  • NestJS Guards         │      │  • Stripe Payment        │
+└──────────────────────────┘      └──────────────────────────┘
+```
 
-### 🎨 Frontend - Modern Interface
+## 🚀 Quick Start
 
-- **⚛️ React 18** - Functional components and hooks
-- **📱 Responsive Design** - Mobile-first approach
-- **🎭 Intuitive UI/UX** - Focused on user experience
-- **⚡ Optimized Performance** - Fast and efficient loading
+### Option 1: Docker (Recommended - Test Full Stack)
 
-## 🚀 How to Run
-
-### 📦 Option 1: Docker (Recommended for Production)
-
-**Complete stack with horizontal scaling and load balancer:**
+**Runs complete infrastructure with load balancing and horizontal scaling:**
 
 ```bash
-# Start all services (nginx + 2 backend instances + redis + postgres)
 docker compose up --build
-
-# Access the application:
-# - Load Balancer: http://localhost:3000
-# - Backend Instance 1: http://localhost:2998
-# - Backend Instance 2: http://localhost:2999
-# - PostgreSQL: localhost:5432
-# - Redis: localhost:6379
 ```
 
-**Services included:**
+**What's running:**
 
-- 🔀 **Nginx Load Balancer** - Distributes traffic between backend instances
-- 🚀 **2x Backend Instances** - Horizontal scaling with WebSocket sync via Redis
-- 📊 **PostgreSQL** - Production database with persistent volumes
-- ⚡ **Redis** - WebSocket pub/sub for event synchronization
+- ⚖️ Nginx Load Balancer → `http://localhost:3000`
+- 🚀 Backend Instance 1 → `http://localhost:2998`
+- 🚀 Backend Instance 2 → `http://localhost:2999`
+- 🗄️ PostgreSQL → `localhost:5432`
+- ⚡ Redis → `localhost:6379`
 
-📖 **See [DOCKER.md](DOCKER.md) for complete documentation**
+📖 **See [DOCKER.md](DOCKER.md) for details and troubleshooting**
 
-### 🔧 Option 2: Local Development
-
-**Prerequisites:**
-
-- Node.js 18+
-- PostgreSQL 14+
-- npm or yarn
-
-### 🔧 Quick Setup
+### Option 2: Local Development
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/delivery-app.git
-cd delivery-app
+# Prerequisites: Node.js 18+, PostgreSQL 14+
 
 # Backend
 cd backend
-npm install
-cp .env.example .env
-# Configure your environment variables
-npm run prisma:migrate
-npm run dev
+yarn install
+cp .env.example .env  # Configure DATABASE_URL and JWT_SECRET
+npx prisma migrate dev
+yarn start:dev        # Runs on :3000
 
-# Frontend (in another terminal)
-cd ../frontend
-npm install
-npm run dev
+# Frontend (new terminal)
+cd frontend
+yarn install
+yarn dev              # Runs on :3001
 ```
 
-## 🌟 Technical Highlights
+📖 **See [backend/README.md](backend/README.md) for API documentation**
 
-### 💎 Code Quality
+## ✨ Key Features
 
-- ✅ **Clean Architecture** - Clear separation of concerns
-- ✅ **SOLID Principles** - Extensible and maintainable code
-- ✅ **Design Patterns** - Repository, Strategy
-- ✅ **Type Safety** - 100% TypeScript throughout the project
+### For Customers
 
-### 🚀 Performance & Scalability
+- Browse restaurants by location
+- View menus with categories and item details
+- Place orders with multiple payment methods
+- Real-time order status updates via WebSocket
+- Manage delivery addresses
 
-- ⚡ **Query Optimizations** - Efficient indexes and relationships
-- 🔄 **Smart Caching** - Redis for frequent data
-- 📊 **Monitoring** - Structured logs and metrics
-- 🐳 **Containerization** - Multi-stage Docker builds for production
-- 🔀 **Horizontal Scaling** - Load balancer + multiple backend instances
-- 🌐 **WebSocket Scalability** - Redis adapter for real-time sync across instances
-- 📡 **Real-time Events** - Order updates, notifications, and delivery tracking
-- 🧪 **[WebSocket Test Tool](backend/test/websocket-test.html)** - Interactive testing interface
+### For Restaurants
 
-### 🔒 Security
+- Complete menu management (categories, items, prices)
+- Receive and manage orders in real-time
+- Update order status (preparing, ready, etc.)
+- Track delivery assignments
 
-- 🛡️ **Robust Authentication** - JWT with refresh tokens
-- 🔐 **Data Validation** - Rigorous sanitization and validation
-- 🔑 **Encryption** - Protected sensitive data
+### For Delivery Drivers
 
-## � Documentation
+- Update location and availability status
+- Receive delivery assignments
+- Mark deliveries as picked up and delivered
 
-- 📖 **[DOCKER.md](DOCKER.md)** - Complete Docker deployment guide
-- 🔌 **[WEBSOCKET-SCALING.md](WEBSOCKET-SCALING.md)** - WebSocket horizontal scaling architecture
-- ⚙️ **[Backend README](backend/README.md)** - API documentation and setup
-- 🧪 **[WebSocket Test](backend/test/websocket-test.html)** - Interactive scalability testing
+## 🔧 Key Technical Decisions
 
-## 📈 Roadmap
+### Why Hexagonal Architecture?
 
-- [x] 🔔 **Real-time WebSockets** - Order and delivery updates
-- [x] 🔀 **Horizontal Scaling** - Load balanced architecture with Redis
-- [ ] 💳 **In-App Payments** - Direct payment processing
-- [ ] 🔔 **Push Notifications** - WebSockets for real-time updates
-- [ ] 📊 **Analytics Dashboard** - Restaurant performance metrics (daily orders, monthly revenue, best-selling products)
-- [ ] 🌍 **Multi-language** - Internationalization support
+**Problem:** Tight coupling between business logic and infrastructure makes code hard to test and maintain.
+
+**Solution:** Separate domain logic from external concerns (database, API, UI). Business rules in `domain/`, use cases in `application/`, infrastructure in `infra/`.
+
+**Result:** Testable business logic, easy to swap implementations (e.g., change database or add GraphQL).
+
+### Why Redis for WebSocket Scaling?
+
+**Problem:** Socket.io stores connections in memory. With multiple instances behind a load balancer, clients connected to different servers don't receive events.
+
+**Solution:** Redis pub/sub adapter synchronizes events across all backend instances.
+
+**Result:** True horizontal scalability - deploy 2, 10, or 100 instances without losing real-time functionality.
+
+**Test it:** Open [backend/test/websocket-test.html](backend/test/websocket-test.html) to see 3 clients receiving synchronized events.
+
+### Why Multi-Stage Docker Builds?
+
+**Problem:** Standard Node.js Docker images include dev dependencies and source code, resulting in 500MB+ images.
+
+**Solution:** Separate build and runtime stages. Build stage compiles TypeScript, runtime stage only contains production dependencies and compiled code.
+
+**Result:** Final image ~150MB, faster deployments, improved security.
+
+## 📚 Documentation
+
+| Document                                                     | Description                                      |
+| ------------------------------------------------------------ | ------------------------------------------------ |
+| [backend/README.md](backend/README.md)                       | API endpoints, architecture details, local setup |
+| [frontend/README.md](frontend/README.md)                     | Frontend structure and components                |
+| [DOCKER.md](DOCKER.md)                                       | Docker setup, services, and troubleshooting      |
+| [backend/WEBSOCKET-SCALING.md](backend/WEBSOCKET-SCALING.md) | WebSocket scaling architecture and testing       |
+| [CONTRIBUTING.md](CONTRIBUTING.md)                           | How to contribute to this project                |
+
+---
+
+<div align="center">
+
+**Built by [Emilio Sanches](https://github.com/emiliosanches)**
+
+[LinkedIn](https://linkedin.com/in/emiliosanches) • [GitHub](https://github.com/emiliosanches) • [Email](mailto:emiliosneto13@gmail.com)
+
+_This is a portfolio project showcasing modern full-stack development practices_
+
+[MIT License](LICENSE)
+
+</div>
 
 ---
 

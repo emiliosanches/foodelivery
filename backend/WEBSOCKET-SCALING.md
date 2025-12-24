@@ -1,22 +1,16 @@
-# WebSocket Horizontal Scaling
+# 🔌 WebSocket Horizontal Scaling
 
-## 🎯 Overview
-
-This application supports horizontal WebSocket scaling through Socket.io's **Redis Adapter**. This allows multiple application instances to share information about connections and real-time events.
+Socket.io with Redis adapter enables multiple backend instances to share WebSocket connections and synchronize real-time events.
 
 ## 🧪 Quick Test
 
-**Want to test if scaling is working?** Open the interactive test tool:
+**Visual proof that scaling works:**
 
-**📍 [backend/test/websocket-test.html](test/websocket-test.html)**
-
-1. Start the Docker Compose stack (see [DOCKER.md](../DOCKER.md))
-2. Open `websocket-test.html` in your browser
-3. Get a JWT token from the API (register/login)
-4. Paste the token and click "Connect All Clients"
-5. Click "Send Test Event" - all 3 clients should receive it! ✨
-
-This proves that Redis is synchronizing events across all backend instances.
+1. Run `docker compose up --build` (from project root)
+2. Open [test/websocket-test.html](test/websocket-test.html) in browser
+3. Get JWT token from `/auth/register` or `/auth/login`
+4. Paste token → "Connect All Clients" → "Send Test Event"
+5. ✅ All 3 clients receive the event (proves Redis synchronization)
 
 ## 🏗️ Architecture
 
@@ -28,32 +22,32 @@ This proves that Redis is synchronizing events across all backend instances.
    ┌───┴───┐
    │       │
 ┌──▼───┐ ┌─▼────┐
-│ App1 │ │ App2 │
-│:3000 │ │:3001 │
+│ App1 │ │ App2 │  (Both connected to Redis)
 └───┬──┘ └──┬───┘
     │       │
     └───┬───┘
         │
     ┌───▼───┐
-    │ Redis │
-    │ :6379 │
+    │ Redis │  (Pub/Sub broker)
     └───────┘
 ```
 
-### Como Funciona
+### Without Redis (Single Instance)
 
-1. **Sem Redis** (Single Instance):
+- Each instance stores connections in memory only
+- Event in App1 only reaches clients connected to App1
+- ❌ Doesn't work with load balancer
 
-   - Cada instância mantém suas conexões WebSocket apenas em memória local
-   - Um evento processado na Instância A só notifica usuários conectados na Instância A
-   - ❌ Não funciona com load balancer
+### With Redis (Multi Instance)
 
-2. **Com Redis** (Multi Instance):
-   - Redis atua como um pub/sub broker entre todas as instâncias
-   - Um evento processado na Instância A é propagado via Redis para todas as outras instâncias
-   - ✅ Funciona perfeitamente com load balancer
+- Redis acts as pub/sub broker between instances
+- Event in App1 is published to Redis
+- Redis broadcasts to App2
+- ✅ All clients receive events regardless of connection point
 
-## 📦 Dependências Instaladas
+## 📦 Implementation
+
+### Dependencies
 
 ```json
 {
@@ -62,92 +56,109 @@ This proves that Redis is synchronizing events across all backend instances.
 }
 ```
 
-## ⚙️ Configuração
+### Configuration
 
-### Variáveis de Ambiente
-
-Defina no seu arquivo `.env`:
+**Environment Variable:**
 
 ```env
-REDIS_URL=redis://localhost:6379
+REDIS_URL=redis://localhost:6379  # Optional - enables scaling
 ```
 
-### Comportamento
+**Behavior:**
 
-- **REDIS_URL presente**: Redis adapter configurado automaticamente
-- **REDIS_URL ausente**: Aplicação roda em modo single-instance (desenvolvimento local)
+- `REDIS_URL` present → Redis adapter enabled (multi-instance mode)
+- `REDIS_URL` absent → In-memory adapter (single-instance mode)
 
-## 🚀 Execução
+### Code Structure
 
-### Redis Local (Docker)
+**1. Custom Adapter** (`infra/adapters/out/websocket/redis-io.adapter.ts`):
 
-```bash
-# Rodar Redis via Docker
-docker run -d \
-  --name redis \
-  -p 6379:6379 \
-  redis:7-alpine
+```typescript
+export class RedisIoAdapter extends IoAdapter {
+  async connectToRedis(): Promise<void> {
+    const pubClient = createClient({ url: redisUrl });
+    const subClient = pubClient.duplicate();
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    this.adapterConstructor = createAdapter(pubClient, subClient);
+  }
+
+  createIOServer(port: number, options?: ServerOptions): any {
+    const server = super.createIOServer(port, options);
+    server.adapter(this.adapterConstructor);
+    return server;
+  }
+}
 ```
 
-## 🧪 Testando Escalabilidade
+**2. Main Bootstrap** (`main.ts`):
 
-### 1. Subir Redis
+```typescript
+const redisIoAdapter = new RedisIoAdapter(app, configService);
+await redisIoAdapter.connectToRedis();
+app.useWebSocketAdapter(redisIoAdapter);
+```
+
+**3. Gateway** (`infra/adapters/out/websocket/events.gateway.ts`):
+
+```typescript
+@WebSocketGateway({ namespace: '/events' })
+export class EventsGateway {
+  @SubscribeMessage('test-event')
+  handleTestEvent(client: Socket, payload: any) {
+    // Broadcast to ALL clients across ALL instances
+    this.server.emit('test-event', payload);
+  }
+}
+```
+
+## 🚀 Running Locally
+
+### Option 1: Docker (Easiest)
 
 ```bash
+docker compose up --build
+# Redis + 2 backend instances + load balancer ready!
+```
+
+### Option 2: Manual Setup
+
+```bash
+# Start Redis
 docker run -d --name redis -p 6379:6379 redis:7-alpine
-```
 
-### 2. Subir Múltiplas Instâncias
-
-```bash
-# Remova a variavel PORT do .env para settar manualmente em cada terminal
-
-# Terminal 1 - Instância na porta 3000
+# Terminal 1
 PORT=3000 REDIS_URL=redis://localhost:6379 yarn start
 
-# Terminal 2 - Instância na porta 3001
+# Terminal 2
 PORT=3001 REDIS_URL=redis://localhost:6379 yarn start
+
+# Connect clients to :3000 and :3001 - they'll sync via Redis
 ```
 
-### 3. Testar Comunicação entre Instâncias
+## 📊 Verification
 
-```javascript
-// Cliente conecta na instância :3000
-const socket1 = io('http://localhost:3000/events', {
-  auth: { token: 'JWT_TOKEN_USER_123' },
-});
+**Console Logs:**
 
-// Cliente conecta na instância :3001
-const socket2 = io('http://localhost:3001/events', {
-  auth: { token: 'JWT_TOKEN_USER_123' },
-});
-
-// Criar um pedido (processado em qualquer instância)
-// AMBOS os clientes receberão a notificação via Redis
-```
-
-## 📊 Logs
-
-Com Redis configurado, você verá no console:
+✅ With Redis:
 
 ```
-[Nest] INFO [EventsGateway] WebSocket Gateway initialized
-[Nest] INFO [EventsGateway] Redis adapter configured for WebSocket scalability
+[EventsGateway] Redis adapter configured for WebSocket scalability
 ```
 
-Sem Redis:
+⚠️ Without Redis:
 
 ```
-[Nest] WARN [EventsGateway] REDIS_URL not configured. WebSocket will run in single-instance mode
+[EventsGateway] REDIS_URL not configured. Running in single-instance mode
 ```
 
-## ⚠️ Importante
+## 💡 Key Takeaways
 
-### Sticky Sessions
+1. **No Sticky Sessions Required:** Redis handles synchronization automatically
+2. **Graceful Fallback:** App works without Redis (single-instance mode)
+3. **Broadcast to All:** `server.emit()` reaches every client on every instance
+4. **Production Ready:** Just set `REDIS_URL` environment variable
 
-Com Socket.io + Redis, você **NÃO precisa** de sticky sessions no load balancer. O Redis garante que os eventos sejam entregues corretamente independente de qual instância o cliente está conectado.
+## 🔗 Related Docs
 
-### Fallback
-
-Se o Redis falhar durante a inicialização, a aplicação continuará funcionando em modo single-instance. Isso é útil para desenvolvimento local sem Redis.
-
+- [DOCKER.md](../DOCKER.md) - Full production stack setup
+- [test/websocket-test.html](test/websocket-test.html) - Interactive testing tool
