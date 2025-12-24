@@ -107,8 +107,8 @@ export default function Header() {
                   user.role === "RESTAURANT"
                     ? "/restaurant/dashboard"
                     : user.role === "DELIVERY"
-                      ? "/delivery/dashboard"
-                      : "/orders"
+                    ? "/delivery/dashboard"
+                    : "/orders"
                 }
                 className="block py-2 text-gray-600 hover:text-primary-600"
                 onClick={() => setMobileMenuOpen(false)}
@@ -116,8 +116,8 @@ export default function Header() {
                 {user.role === "RESTAURANT"
                   ? "Dashboard Restaurante"
                   : user.role === "DELIVERY"
-                    ? "Dashboard Entregador"
-                    : "Meus Pedidos"}
+                  ? "Dashboard Entregador"
+                  : "Meus Pedidos"}
               </Link>
             )}
 
