@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Scalability Test - Mini Food</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .control-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
+        }
+
+        .connections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .connection-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .connection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .connection-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .connection-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .connection-info div {
+            margin-bottom: 5px;
+        }
+
+        .connection-info strong {
+            color: #667eea;
+        }
+
+        .events-container {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .event {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .event-type {
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .event-time {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .event-data {
+            font-size: 13px;
+            color: #333;
+            word-wrap: break-word;
+        }
+
+        .stats {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .stats h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .help-text {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .help-text strong {
+            color: #856404;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 WebSocket Scalability Test</h1>
+        <p class="subtitle">Testing Redis-based horizontal scaling across multiple backend instances</p>
+
+        <div class="control-panel">
+            <h2 style="margin-bottom: 20px; color: #333;">Connection Settings</h2>
+            
+            <div class="form-group">
+                <label for="serverUrl">🌐 Server URL (Load Balancer)</label>
+                <input type="text" id="serverUrl" value="http://localhost:3000" placeholder="http://localhost:3000">
+            </div>
+
+            <div class="form-group">
+                <label for="jwtToken">🔑 JWT Token (Optional - for authenticated connections)</label>
+                <input type="text" id="jwtToken" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-success" onclick="connectAll()">✅ Connect All Clients</button>
+                <button class="btn-danger" onclick="disconnectAll()">❌ Disconnect All</button>
+                <button class="btn-primary" onclick="sendTestEvent()">📤 Send Test Event</button>
+                <button class="btn-primary" onclick="clearAllEvents()">🗑️ Clear Events</button>
+            </div>
+
+            <div class="help-text">
+                <strong>💡 How to test:</strong><br>
+                1. Start your Docker Compose stack (nginx + 2 backend instances + Redis)<br>
+                2. Get a JWT token by registering/logging in through the API<br>
+                3. Paste the token above (optional, but needed for authenticated events)<br>
+                4. Click "Connect All Clients" to establish 3 connections<br>
+                5. Click "Send Test Event" - all 3 clients should receive it (proving Redis sync works!)
+            </div>
+        </div>
+
+        <div class="connections-grid" id="connectionsGrid"></div>
+
+        <div class="stats">
+            <h2>📊 Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalConnections">0</div>
+                    <div class="stat-label">Active Connections</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalEvents">0</div>
+                    <div class="stat-label">Total Events Received</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="testEventsSent">0</div>
+                    <div class="stat-label">Test Events Sent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="syncSuccess">0%</div>
+                    <div class="stat-label">Sync Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Track connections and stats
+        const connections = [];
+        let totalEventsSent = 0;
+        let lastEventReceivedCount = 0;
+
+        // Initialize connections UI
+        function initializeUI() {
+            const grid = document.getElementById('connectionsGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 3; i++) {
+                const box = document.createElement('div');
+                box.className = 'connection-box';
+                box.id = `connection-${i}`;
+                box.innerHTML = `
+                    <div class="connection-header">
+                        <div class="connection-title">Client ${i}</div>
+                        <span class="status disconnected" id="status-${i}">Disconnected</span>
+                    </div>
+                    <div class="connection-info" id="info-${i}">
+                        <div><strong>Socket ID:</strong> Not connected</div>
+                        <div><strong>Backend Instance:</strong> Unknown</div>
+                        <div><strong>Events Received:</strong> <span id="count-${i}">0</span></div>
+                    </div>
+                    <div class="events-container" id="events-${i}"></div>
+                `;
+                grid.appendChild(box);
+
+                connections.push({
+                    id: i,
+                    socket: null,
+                    eventCount: 0,
+                    backendInstance: null
+                });
+            }
+        }
+
+        // Connect all clients
+        function connectAll() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const token = document.getElementById('jwtToken').value;
+
+            connections.forEach((conn, index) => {
+                if (conn.socket?.connected) {
+                    addEvent(conn.id, 'warning', 'Already connected');
+                    return;
+                }
+
+                const options = {
+                    transports: ['websocket', 'polling'],
+                    auth: token ? { token } : {}
+                };
+
+                // Connect to /events namespace (where EventsGateway is listening)
+                const socket = io(serverUrl + '/events', options);
+
+                socket.on('connect', () => {
+                    conn.socket = socket;
+                    updateStatus(conn.id, 'connected');
+                    updateConnectionInfo(conn.id, socket.id);
+                    addEvent(conn.id, 'connection', `Connected with socket ID: ${socket.id}`);
+                    updateStats();
+
+                    // Try to detect which backend instance we're connected to
+                    // This would require the backend to send this info
+                });
+
+                socket.on('disconnect', () => {
+                    updateStatus(conn.id, 'disconnected');
+                    addEvent(conn.id, 'disconnection', 'Disconnected from server');
+                    updateStats();
+                });
+
+                socket.on('connect_error', (error) => {
+                    addEvent(conn.id, 'error', `Connection error: ${error.message}`);
+                });
+
+                // Listen for test events
+                socket.on('test-event', (data) => {
+                    conn.eventCount++;
+                    addEvent(conn.id, 'test-event', JSON.stringify(data, null, 2));
+                    document.getElementById(`count-${conn.id}`).textContent = conn.eventCount;
+                    lastEventReceivedCount++;
+                    updateStats();
+                });
+
+                // Listen for notification events (from your app)
+                socket.on('notification', (data) => {
+                    conn.eventCount++;
+                    addEvent(conn.id, 'notification', JSON.stringify(data, null, 2));
+                    document.getElementById(`count-${conn.id}`).textContent = conn.eventCount;
+                    updateStats();
+                });
+
+                // Listen for order events
+                socket.on('order-update', (data) => {
+                    conn.eventCount++;
+                    addEvent(conn.id, 'order-update', JSON.stringify(data, null, 2));
+                    document.getElementById(`count-${conn.id}`).textContent = conn.eventCount;
+                    updateStats();
+                });
+
+                // Listen for delivery events
+                socket.on('delivery-update', (data) => {
+                    conn.eventCount++;
+                    addEvent(conn.id, 'delivery-update', JSON.stringify(data, null, 2));
+                    document.getElementById(`count-${conn.id}`).textContent = conn.eventCount;
+                    updateStats();
+                });
+
+                // Generic event listener for any other events
+                socket.onAny((eventName, ...args) => {
+                    if (!['connect', 'disconnect', 'test-event', 'notification', 'order-update', 'delivery-update'].includes(eventName)) {
+                        conn.eventCount++;
+                        addEvent(conn.id, eventName, JSON.stringify(args, null, 2));
+                        document.getElementById(`count-${conn.id}`).textContent = conn.eventCount;
+                        updateStats();
+                    }
+                });
+            });
+        }
+
+        // Disconnect all clients
+        function disconnectAll() {
+            connections.forEach(conn => {
+                if (conn.socket) {
+                    conn.socket.disconnect();
+                    conn.socket = null;
+                }
+            });
+            updateStats();
+        }
+
+        // Send test event to verify Redis sync
+        function sendTestEvent() {
+            const connectedSockets = connections.filter(c => c.socket?.connected);
+            
+            if (connectedSockets.length === 0) {
+                alert('No connections active! Please connect clients first.');
+                return;
+            }
+
+            lastEventReceivedCount = 0;
+            totalEventsSent++;
+
+            const testData = {
+                message: `Test event #${totalEventsSent}`,
+                timestamp: new Date().toISOString(),
+                random: Math.random()
+            };
+
+            // Send from the first connected client
+            // With Redis, ALL clients should receive this event
+            connectedSockets[0].socket.emit('test-event', testData);
+
+            addEvent(connectedSockets[0].id, 'sent', `Sent test event #${totalEventsSent}`);
+            
+            // Update stats after a short delay to allow events to propagate
+            setTimeout(updateStats, 500);
+        }
+
+        // Update connection status
+        function updateStatus(clientId, status) {
+            const statusEl = document.getElementById(`status-${clientId}`);
+            statusEl.textContent = status === 'connected' ? 'Connected' : 'Disconnected';
+            statusEl.className = `status ${status}`;
+        }
+
+        // Update connection info
+        function updateConnectionInfo(clientId, socketId) {
+            const infoEl = document.getElementById(`info-${clientId}`);
+            infoEl.innerHTML = `
+                <div><strong>Socket ID:</strong> ${socketId}</div>
+                <div><strong>Backend Instance:</strong> Detected via events</div>
+                <div><strong>Events Received:</strong> <span id="count-${clientId}">0</span></div>
+            `;
+        }
+
+        // Add event to connection log
+        function addEvent(clientId, type, data) {
+            const eventsContainer = document.getElementById(`events-${clientId}`);
+            const event = document.createElement('div');
+            event.className = 'event';
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString() + '.' + now.getMilliseconds();
+            
+            event.innerHTML = `
+                <div class="event-type">${type}</div>
+                <div class="event-time">${timeStr}</div>
+                <div class="event-data">${data}</div>
+            `;
+            
+            eventsContainer.insertBefore(event, eventsContainer.firstChild);
+            
+            // Keep only last 50 events
+            while (eventsContainer.children.length > 50) {
+                eventsContainer.removeChild(eventsContainer.lastChild);
+            }
+        }
+
+        // Clear all events
+        function clearAllEvents() {
+            connections.forEach(conn => {
+                document.getElementById(`events-${conn.id}`).innerHTML = '';
+                conn.eventCount = 0;
+                document.getElementById(`count-${conn.id}`).textContent = '0';
+            });
+            updateStats();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const activeConnections = connections.filter(c => c.socket?.connected).length;
+            const totalEvents = connections.reduce((sum, c) => sum + c.eventCount, 0);
+            
+            document.getElementById('totalConnections').textContent = activeConnections;
+            document.getElementById('totalEvents').textContent = totalEvents;
+            document.getElementById('testEventsSent').textContent = totalEventsSent;
+
+            // Calculate sync success rate
+            // If we sent N test events, all active connections should have received them
+            const expectedEvents = totalEventsSent * activeConnections;
+            const syncRate = expectedEvents > 0 ? Math.round((lastEventReceivedCount / (totalEventsSent * Math.min(activeConnections, 3))) * 100) : 0;
+            document.getElementById('syncSuccess').textContent = syncRate + '%';
+        }
+
+        // Initialize on load
+        initializeUI();
+        updateStats();
+
+        // Show helpful console messages
+        console.log('%c🚀 WebSocket Scalability Test Ready!', 'color: #667eea; font-size: 20px; font-weight: bold;');
+        console.log('%cTo test Redis sync:', 'color: #667eea; font-size: 14px;');
+        console.log('1. Connect all clients');
+        console.log('2. Send a test event');
+        console.log('3. All clients should receive it simultaneously (proving Redis pub/sub works!)');
+    </script>
+</body>
+</html>

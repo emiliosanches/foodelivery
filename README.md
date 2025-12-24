@@ -17,7 +17,7 @@
 
 - 🏪 **Complete Restaurant Management** - Menus, categories, and orders
 - 🚚 **Smart Delivery System** - Real-time tracking
-- 👥 **Multi-user Profiles** - Customers, restaurants, and drivers  
+- 👥 **Multi-user Profiles** - Customers, restaurants, and drivers
 - 💳 **Payment Processing** - Multiple secure payment methods
 - 📱 **Responsive Interface** - Optimized experience across all devices
 - 🔔 **Real-time Notifications** - Instant status updates
@@ -49,7 +49,35 @@ FooDelivery/
 
 ## 🚀 How to Run
 
-### Prerequisites
+### 📦 Option 1: Docker (Recommended for Production)
+
+**Complete stack with horizontal scaling and load balancer:**
+
+```bash
+# Start all services (nginx + 2 backend instances + redis + postgres)
+docker compose up --build
+
+# Access the application:
+# - Load Balancer: http://localhost:3000
+# - Backend Instance 1: http://localhost:2998
+# - Backend Instance 2: http://localhost:2999
+# - PostgreSQL: localhost:5432
+# - Redis: localhost:6379
+```
+
+**Services included:**
+
+- 🔀 **Nginx Load Balancer** - Distributes traffic between backend instances
+- 🚀 **2x Backend Instances** - Horizontal scaling with WebSocket sync via Redis
+- 📊 **PostgreSQL** - Production database with persistent volumes
+- ⚡ **Redis** - WebSocket pub/sub for event synchronization
+
+📖 **See [DOCKER.md](DOCKER.md) for complete documentation**
+
+### 🔧 Option 2: Local Development
+
+**Prerequisites:**
+
 - Node.js 18+
 - PostgreSQL 14+
 - npm or yarn
@@ -78,26 +106,41 @@ npm run dev
 ## 🌟 Technical Highlights
 
 ### 💎 Code Quality
+
 - ✅ **Clean Architecture** - Clear separation of concerns
 - ✅ **SOLID Principles** - Extensible and maintainable code
 - ✅ **Design Patterns** - Repository, Strategy
 - ✅ **Type Safety** - 100% TypeScript throughout the project
 
 ### 🚀 Performance & Scalability
+
 - ⚡ **Query Optimizations** - Efficient indexes and relationships
 - 🔄 **Smart Caching** - Redis for frequent data
 - 📊 **Monitoring** - Structured logs and metrics
-- 🐳 **Containerization** - Docker for consistent deployment
-- 🔀 **Horizontal Scaling** - Multiple containers with WebSockets synchronized via Redis
+- 🐳 **Containerization** - Multi-stage Docker builds for production
+- 🔀 **Horizontal Scaling** - Load balancer + multiple backend instances
+- 🌐 **WebSocket Scalability** - Redis adapter for real-time sync across instances
+- 📡 **Real-time Events** - Order updates, notifications, and delivery tracking
+- 🧪 **[WebSocket Test Tool](backend/test/websocket-test.html)** - Interactive testing interface
 
 ### 🔒 Security
+
 - 🛡️ **Robust Authentication** - JWT with refresh tokens
 - 🔐 **Data Validation** - Rigorous sanitization and validation
 - 🔑 **Encryption** - Protected sensitive data
 
+## � Documentation
+
+- 📖 **[DOCKER.md](DOCKER.md)** - Complete Docker deployment guide
+- 🔌 **[WEBSOCKET-SCALING.md](WEBSOCKET-SCALING.md)** - WebSocket horizontal scaling architecture
+- ⚙️ **[Backend README](backend/README.md)** - API documentation and setup
+- 🧪 **[WebSocket Test](backend/test/websocket-test.html)** - Interactive scalability testing
+
 ## 📈 Roadmap
 
-- [ ] 🔔 **In-App Payments** - WebSockets for real-time updates
+- [x] 🔔 **Real-time WebSockets** - Order and delivery updates
+- [x] 🔀 **Horizontal Scaling** - Load balanced architecture with Redis
+- [ ] 💳 **In-App Payments** - Direct payment processing
 - [ ] 🔔 **Push Notifications** - WebSockets for real-time updates
 - [ ] 📊 **Analytics Dashboard** - Restaurant performance metrics (daily orders, monthly revenue, best-selling products)
 - [ ] 🌍 **Multi-language** - Internationalization support

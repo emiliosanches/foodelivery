@@ -42,6 +42,7 @@ This API is the heart of **FooDelivery**, a modern delivery platform that manage
 - **🗄️ Prisma ORM** - Type-safe database client with migrations
 - **🐘 PostgreSQL** - Robust and high-performance relational database
 - **🔐 JWT** - Stateless and secure authentication
+- **🔌 Socket.io** - Real-time WebSocket communication with Redis adapter for horizontal scaling
 - **🧪 Jest** - Complete testing framework
 - **📊 Class Validator** - Declarative data validation
 
@@ -78,21 +79,24 @@ This API is the heart of **FooDelivery**, a modern delivery platform that manage
 
 ## 🚀 How to Run
 
-### Prerequisites
+### 💻 Option 1: Local Development
+
+**Prerequisites:**
 
 ```bash
 Node.js >= 18.0.0
 PostgreSQL >= 14.0
-npm >= 8.0.0
+npm >= 8.0.0 or yarn >= 1.22.0
+Redis >= 6.0 (optional, for WebSocket scaling)
 ```
 
-### 🔧 Installation
+**Installation:**
 
 ```bash
 # Clone and install dependencies
 git clone <repository-url>
 cd backend
-npm install
+yarn install  # or npm install
 
 # Configure environment
 cp .env.example .env
@@ -106,6 +110,23 @@ npx prisma generate
 npm run start:dev
 ```
 
+### 🐳 Option 2: Docker (multiple containers + load balancer)
+
+**Production-ready stack with horizontal scaling:**
+
+```bash
+# From the root directory (containing backend folder)
+
+docker compose up --build
+
+# Access the application:
+# - Load Balancer: http://localhost:3000
+# - Backend Instance 1: http://localhost:2998
+# - Backend Instance 2: http://localhost:2999
+```
+
+See [DOCKER.md](../DOCKER.md) for complete documentation.
+
 ### 🌍 Environment Variables
 
 ```bash
@@ -116,10 +137,39 @@ DATABASE_URL="postgresql://user:password@localhost:5432/foodeliver"
 JWT_SECRET="your-super-secret-jwt-key"
 JWT_EXPIRES_IN="7d"
 
+# Redis (Optional - for WebSocket horizontal scaling)
+# Leave commented for single-instance development
+# Uncomment when deploying multiple instances behind a load balancer
+# REDIS_URL="redis://localhost:6379"
+
 # App
 PORT=3000
 NODE_ENV="development"
 FRONTEND_URL="http://localhost:3001/"
+```
+
+### 🔌 WebSocket Real-Time Features
+
+The API includes real-time WebSocket support using Socket.io:
+
+- **Namespace**: `/events`
+- **Authentication**: JWT required (via header or auth object)
+- **Events**:
+  - `notification:new` - New notification for user
+  - `order:new` - New order created
+  - `order:status-updated` - Order status changed
+
+**Horizontal Scaling**: The WebSocket implementation supports multiple instances via Redis adapter. See [WEBSOCKET-SCALING.md](./WEBSOCKET-SCALING.md) for detailed setup and deployment instructions.
+
+```javascript
+// Example client connection
+const socket = io('http://localhost:3000/events', {
+  auth: { token: 'YOUR_JWT_TOKEN' },
+});
+
+socket.on('notification:new', (data) => {
+  console.log('New notification:', data);
+});
 ```
 
 ## 📋 API Endpoints

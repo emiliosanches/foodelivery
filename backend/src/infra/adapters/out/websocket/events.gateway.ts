@@ -4,6 +4,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
@@ -34,7 +35,7 @@ export class EventsGateway
     private readonly webSocketAdapter: WebSocketAdapter,
   ) {}
 
-  afterInit(server: Server) {
+  async afterInit(server: Server) {
     this.logger.log('WebSocket Gateway initialized');
     this.webSocketAdapter.setServer(server);
   }
@@ -104,6 +105,25 @@ export class EventsGateway
   }
 
   /**
+   * Handle test events for scalability testing
+   * This receives test-event from any client and broadcasts to ALL clients
+   * across all backend instances (via Redis adapter)
+   */
+  @SubscribeMessage('test-event')
+  handleTestEvent(client: Socket, payload: any): void {
+    this.logger.log(
+      `Test event received from ${client.id}: ${JSON.stringify(payload)}`,
+    );
+
+    // Broadcast to ALL clients (including those on other backend instances)
+    this.server.emit('test-event', {
+      ...payload,
+      receivedBy: client.id,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
    * Extract JWT token from socket handshake
    */
   private extractTokenFromHandshake(client: Socket): string | null {
@@ -122,4 +142,3 @@ export class EventsGateway
     return null;
   }
 }
-
