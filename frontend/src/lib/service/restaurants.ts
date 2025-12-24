@@ -72,3 +72,25 @@ export async function listMenuItems(restaurantId: string): Promise<MenuItem[]> {
     cache: "no-store",
   });
 }
+
+export async function listRestaurantsByCity(
+  city: string,
+  {
+    page = 1,
+    limit = 12,
+  }: {
+    page?: number;
+    limit?: number;
+  } = {}
+): Promise<RestaurantListResponse> {
+  const search = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  // Backend endpoint aligned with docs: /restaurants/search/city/:city
+  return api<RestaurantListResponse>(
+    `/restaurants/search/city/${encodeURIComponent(city)}?${search.toString()}`,
+    { cache: "no-store" }
+  );
+}
