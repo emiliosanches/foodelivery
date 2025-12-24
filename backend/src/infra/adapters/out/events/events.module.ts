@@ -3,10 +3,11 @@ import { NotificationsModule } from '../../in/rest/modules/notifications/notific
 import { OrderEventHandler } from '@/application/event-handlers/order.event-handler';
 import { OrdersEventBusPort } from '@/application/ports/out/event-bus';
 import { OrdersEventBusAdapter } from './orders.event-bus.adapter';
+import { WebSocketModule } from '../websocket/websocket.module';
 
 @Global()
 @Module({
-  imports: [NotificationsModule],
+  imports: [NotificationsModule, WebSocketModule],
   providers: [
     { provide: OrdersEventBusPort, useClass: OrdersEventBusAdapter },
     OrderEventHandler,
@@ -14,4 +15,3 @@ import { OrdersEventBusAdapter } from './orders.event-bus.adapter';
   exports: [OrdersEventBusPort],
 })
 export class EventsModule {}
-

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Notification } from '../../domain/notification';
 import { NotificationRepositoryPort } from '../ports/out/repositories/notification.repository.port';
 import { GetNotificationsDto } from '../dtos/notification/get-notifications.dto';
@@ -45,6 +45,24 @@ export class NotificationService {
     });
 
     return result;
+  }
+
+  async markAsRead(
+    notificationId: string,
+    userId: string,
+  ): Promise<Notification> {
+    const notification =
+      await this.notificationRepository.findById(notificationId);
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+
+    if (notification.userId !== userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.notificationRepository.markAsRead(notificationId);
   }
 
   async markAllAsRead(userId: string): Promise<void> {

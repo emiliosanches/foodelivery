@@ -9,7 +9,8 @@ export abstract class NotificationRepositoryPort {
     unreadOnly: boolean;
   }): Promise<PaginationOutputDto<Notification>>;
   abstract create(notification: Notification): Promise<Notification>;
+  abstract findById(id: string): Promise<Notification | null>;
+  abstract markAsRead(id: string): Promise<Notification>;
   abstract markAllAsRead(userId: string): Promise<void>;
   abstract countUnread(userId: string): Promise<number>;
 }
-

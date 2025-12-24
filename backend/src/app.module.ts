@@ -12,6 +12,7 @@ import { DeliveryModule } from './infra/adapters/in/rest/modules/delivery/delive
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { NotificationsModule } from './infra/adapters/in/rest/modules/notifications/notifications.module';
 import { EventsModule } from './infra/adapters/out/events/events.module';
+import { WebSocketModule } from './infra/adapters/out/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EventsModule } from './infra/adapters/out/events/events.module';
     DeliveryPersonModule,
     NotificationsModule,
     EventsModule,
+    WebSocketModule,
   ],
 })
 export class AppModule {}
