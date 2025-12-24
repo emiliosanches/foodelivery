@@ -8,7 +8,10 @@ export class PrismaService
 {
   constructor() {
     super({
-      log: ['query', 'info', 'warn', 'error'],
+      log:
+        process.env.NODE_ENV === 'test'
+          ? ['error'] // Only errors in test environment
+          : ['warn', 'error'], // Warnings and errors in other environments
     });
   }
 
@@ -20,3 +23,4 @@ export class PrismaService
     await this.$disconnect();
   }
 }
+
