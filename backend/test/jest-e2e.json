@@ -1,9 +1,25 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/../src/$1"
+  },
+  // Force sequential execution (maxWorkers: 1) to avoid race conditions
+  // Each test suite creates its own NestJS application instance and uses shared database
+  // Running in parallel causes conflicts with:
+  // - Database connections pool exhaustion
+  // - Port binding conflicts (websocket tests listen on port 3000)
+  // - Test data cleanup between suites
+  // Sequential execution ensures proper isolation and consistent test results
+  "maxWorkers": 1,
+  "testTimeout": 30000
 }

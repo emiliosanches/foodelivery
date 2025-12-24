@@ -58,7 +58,7 @@
 ```bash
 Node.js >= 18.0.0
 PostgreSQL >= 14.0
-npm >= 8.0.0 or yarn >= 1.22.0
+Yarn >= 1.22.0 (package manager)
 Redis >= 6.0 (optional, for WebSocket scaling)
 ```
 
@@ -68,18 +68,18 @@ Redis >= 6.0 (optional, for WebSocket scaling)
 # Clone and install dependencies
 git clone <repository-url>
 cd backend
-yarn install  # or npm install
+yarn install
 
 # Configure environment
 cp .env.example .env
 # Edit .env with your configurations
 
 # Run migrations
-npx prisma migrate dev
-npx prisma generate
+yarn prisma migrate dev
+yarn prisma generate
 
 # Start the server
-npm run start:dev
+yarn start:dev
 ```
 
 ### 🐳 Option 2: Docker (multiple containers + load balancer)

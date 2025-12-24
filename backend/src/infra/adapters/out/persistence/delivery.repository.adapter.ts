@@ -138,16 +138,10 @@ export class DeliveryRepositoryAdapter extends DeliveryRepositoryPort {
   async findByDeliveryPersonId(
     deliveryPersonId: string,
   ): Promise<DeliveryWithRelations[]> {
-    const where: any = {
-      deliveryPersonId,
-    };
-
-    if (status) {
-      where.status = status;
-    }
-
     const result = await this.prisma.delivery.findMany({
-      where,
+      where: {
+        deliveryPersonId,
+      },
       include: {
         order: {
           include: {
