@@ -59,6 +59,12 @@ export async function getRestaurant(id: string): Promise<Restaurant | null> {
   return api<Restaurant | null>(`/restaurants/${id}`, { cache: "no-store" });
 }
 
+export async function getMyRestaurant(): Promise<Restaurant | null> {
+  return api<Restaurant | null>(`/restaurants/my-restaurant`, {
+    cache: "no-store",
+  });
+}
+
 export async function listCategories(
   restaurantId: string
 ): Promise<Category[]> {
