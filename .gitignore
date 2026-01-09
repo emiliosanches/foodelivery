@@ -38,3 +38,6 @@ Thumbs.db
 # Temporary
 tmp/
 temp/
+
+# Local notes
+/frontend/TODO.md

@@ -6,6 +6,7 @@ import { Menu, X, User, ShoppingBag, LogOut } from "lucide-react";
 import Button from "../ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import Logo from "../ui/logo";
+import RoleNav from "./role-nav";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -32,14 +33,18 @@ export default function Header() {
               Restaurantes
             </Link>
 
+            {user && <RoleNav />}
+
             {user ? (
               <>
-                <Link
-                  href="/orders"
-                  className="text-gray-600 hover:text-primary-600"
-                >
-                  Meus Pedidos
-                </Link>
+                {!user || user.role === "CUSTOMER" ? (
+                  <Link
+                    href="/orders"
+                    className="text-gray-600 hover:text-primary-600"
+                  >
+                    Meus Pedidos
+                  </Link>
+                ) : null}
                 <div className="relative">
                   <button className="flex items-center text-gray-600 hover:text-primary-600">
                     <User className="w-5 h-5 mr-1" />
@@ -96,15 +101,37 @@ export default function Header() {
               Restaurantes
             </Link>
 
+            {user && (
+              <Link
+                href={
+                  user.role === "RESTAURANT"
+                    ? "/restaurant/dashboard"
+                    : user.role === "DELIVERY"
+                    ? "/delivery/dashboard"
+                    : "/orders"
+                }
+                className="block py-2 text-gray-600 hover:text-primary-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {user.role === "RESTAURANT"
+                  ? "Dashboard Restaurante"
+                  : user.role === "DELIVERY"
+                  ? "Dashboard Entregador"
+                  : "Meus Pedidos"}
+              </Link>
+            )}
+
             {user ? (
               <>
-                <Link
-                  href="/orders"
-                  className="block py-2 text-gray-600 hover:text-primary-600"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Meus Pedidos
-                </Link>
+                {!user || user.role === "CUSTOMER" ? (
+                  <Link
+                    href="/orders"
+                    className="block py-2 text-gray-600 hover:text-primary-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Meus Pedidos
+                  </Link>
+                ) : null}
                 <Link
                   href="/profile"
                   className="block py-2 text-gray-600 hover:text-primary-600"

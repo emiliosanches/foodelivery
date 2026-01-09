@@ -6,11 +6,19 @@ Socket.io with Redis adapter enables multiple backend instances to share WebSock
 
 **Visual proof that scaling works:**
 
-1. Run `docker compose up --build` (from project root)
-2. Open [test/websocket-test.html](test/websocket-test.html) in browser
-3. Get JWT token from `/auth/register` or `/auth/login`
-4. Paste token → "Connect All Clients" → "Send Test Event"
-5. ✅ All 3 clients receive the event (proves Redis synchronization)
+1. Configure backend `.env` with Live Server URL:
+   ```bash
+   FRONTEND_URL=http://127.0.0.1:5500  # or your Live Server port
+   ```
+2. Run `docker compose up --build` (from project root) or `yarn dev` for single instance
+3. Serve [test/websocket-test.html](test/websocket-test.html) using **Live Server extension** in VS Code:
+   - Right-click on `test/websocket-test.html` → "Open with Live Server"
+   - Or install Live Server: `ext install ritwickdey.liveserver`
+4. Get JWT token from `/auth/register` or `/auth/login`
+5. Paste token → "Connect All Clients" → "Send Test Event"
+6. ✅ All 3 clients receive the event (proves Redis synchronization)
+
+> **Note:** The HTML file must be served via Live Server (not opened directly as `file://`) due to CORS policy. The backend CORS is configured to accept requests from `FRONTEND_URL` only.
 
 ## 🏗️ Architecture
 
