@@ -8,7 +8,7 @@ import {
 } from "@/lib/service/restaurants";
 
 type RestaurantPageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 function formatMoneyFromCents(value: number): string {
@@ -31,10 +31,11 @@ function groupItemsByCategory(items: MenuItem[]): Record<string, MenuItem[]> {
 export default async function RestaurantDetailPage({
   params,
 }: RestaurantPageProps) {
+  const { id } = await params;
   const [restaurant, categories, menuItems] = await Promise.all([
-    getRestaurant(params.id),
-    listCategories(params.id),
-    listMenuItems(params.id),
+    getRestaurant(id),
+    listCategories(id),
+    listMenuItems(id),
   ]);
 
   if (!restaurant) {

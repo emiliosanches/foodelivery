@@ -1,7 +1,7 @@
-import { requireRole } from "@/lib/auth-utils";
+import { requireAuth } from "@/lib/auth-utils";
 
 export default async function DeliveryDashboardPage() {
-  await requireRole(["DELIVERY"]);
+  await requireAuth();
 
   return (
     <div className="container mx-auto px-4 py-10 space-y-4">

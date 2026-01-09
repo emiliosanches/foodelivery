@@ -1,9 +1,9 @@
 import CityRestaurants from "@/components/restaurants/city-restaurants";
 
 type RestaurantsPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     page?: string;
-  };
+  }>;
 };
 
 export default async function RestaurantsPage({}: RestaurantsPageProps) {

@@ -1,10 +1,10 @@
-import { requireRole } from "@/lib/auth-utils";
+import { requireAuth } from "@/lib/auth-utils";
 
 export default async function RestaurantLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole(["RESTAURANT"]);
+  await requireAuth();
   return <>{children}</>;
 }

@@ -1,19 +1,19 @@
-import { requireRole } from "@/lib/auth-utils";
+import { requireAuth } from "@/lib/auth-utils";
 import { listRestaurantOrders } from "@/lib/service/restaurant-orders";
 import { getMyRestaurant } from "@/lib/service/restaurants";
 import { OrdersListClient } from "./orders-list-client";
 
 type OrdersPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     page?: string;
     status?: string;
-  };
+  }>;
 };
 
 export default async function RestaurantOrdersPage({
   searchParams,
 }: OrdersPageProps) {
-  await requireRole(["RESTAURANT"]);
+  await requireAuth();
 
   const restaurant = await getMyRestaurant();
 
@@ -30,8 +30,9 @@ export default async function RestaurantOrdersPage({
 
   const restaurantId = restaurant.id;
 
-  const page = Number(searchParams?.page) > 0 ? Number(searchParams?.page) : 1;
-  const statusFilter = searchParams?.status as
+  const resolvedParams = await searchParams;
+  const page = Number(resolvedParams?.page) > 0 ? Number(resolvedParams?.page) : 1;
+  const statusFilter = resolvedParams?.status as
     | "PENDING"
     | "PREPARING"
     | "READY"

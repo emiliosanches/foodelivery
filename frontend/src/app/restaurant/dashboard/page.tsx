@@ -1,4 +1,4 @@
-import { requireRole } from "@/lib/auth-utils";
+import { requireAuth } from "@/lib/auth-utils";
 import {
   listRestaurantOrders,
   calculateMetrics,
@@ -9,7 +9,7 @@ import Link from "next/link";
 import { RestaurantOrdersClient } from "./restaurant-orders-client";
 
 export default async function RestaurantDashboardPage() {
-  await requireRole(["RESTAURANT"]);
+  await requireAuth();
 
   const restaurant = await getMyRestaurant();
 
